@@ -103,6 +103,7 @@ class Sbu extends BaseController
             'kualifikasi' => $this->request->getVar('kualifikasi'),
             'masa_berlaku'=> $this->request->getVar('masa_berlaku')
         ]);
+        $this->companyModel->syncCompanyToMember((int) $companyId);
         session()->setFlashdata('pesan', 'Data SBU berhasil ditambahkan.');
         return redirect()->to('/sbu/detail/' . $companyId);
     }
@@ -123,6 +124,7 @@ class Sbu extends BaseController
             'kualifikasi' => $this->request->getVar('kualifikasi'),
             'masa_berlaku'=> $this->request->getVar('masa_berlaku')
         ]);
+        $this->companyModel->syncCompanyToMember((int) $sbu['company_id']);
         session()->setFlashdata('pesan', 'Data SBU berhasil diubah.');
         return redirect()->to('/sbu/detail/' . $sbu['company_id']);
     }
@@ -136,7 +138,10 @@ class Sbu extends BaseController
             return redirect()->to('/sbu');
         }
         
-        $company = $this->companyModel->where('user_id', $sbu['user_id'])->first();
+        $company = $this->companyModel->find($sbu['company_id']);
+        if (!$company) {
+            $company = $this->companyModel->where('user_id', $sbu['user_id'])->first();
+        }
 
         $projects = $this->sbuProjectModel->where('sbu_id', $sbu_id)->findAll();
         
@@ -159,11 +164,13 @@ class Sbu extends BaseController
             return redirect()->to('/sbu');
         }
 
+        $companyId = (int) $sbu['company_id'];
         // Hapus proyek terkait terlebih dahulu
         $this->sbuProjectModel->where('sbu_id', $id)->delete();
         $this->sbuModel->delete($id);
+        $this->companyModel->syncCompanyToMember($companyId);
         session()->setFlashdata('pesan', 'Data SBU berhasil dihapus.');
-        return redirect()->to('/sbu/detail/' . $sbu['company_id']);
+        return redirect()->to('/sbu/detail/' . $companyId);
     }
 
     // --- MANAJEMEN PROYEK SBU ---

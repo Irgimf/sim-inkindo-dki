@@ -27,7 +27,7 @@ class Dashboard extends BaseController
                 $non_jk[] = $c;
             } elseif ($c['kategori_sbu'] == 'Jasa Konstruksi') {
                 $jk[] = $c;
-            } elseif ($c['kategori_sbu'] == 'NJK dan JK') {
+            } elseif ($c['kategori_sbu'] == 'NJK dan JK' || $c['kategori_sbu'] == 'Jasa Konstruksi dan Non Jasa Konstruksi') {
                 $jk_dan_non_jk[] = $c;
             } else {
                 $tidak_punya[] = $c;

@@ -32,7 +32,7 @@ class Pencarian extends BaseController
 
         $builder = $db->table('companies c');
         $builder->select('c.nama_pt, c.kualifikasi as c_kualifikasi, c.kategori_sbu, s.kode_kbli, s.judul_kbli, p.nama_pekerjaan, p.nilai_proyek');
-        $builder->join('sbu s', 's.user_id = c.user_id', 'left');
+        $builder->join('sbu s', 's.company_id = c.id', 'left');
         $builder->join('sbu_projects p', 'p.sbu_id = s.id', 'left');
 
         if (!empty($nama_pt)) {
@@ -110,7 +110,7 @@ class Pencarian extends BaseController
 
         $builder = $db->table('companies c');
         $builder->select('c.nama_pt, c.kualifikasi as c_kualifikasi, c.kategori_sbu, s.kode_kbli, s.judul_kbli, p.nama_pekerjaan, p.nilai_proyek');
-        $builder->join('sbu s', 's.user_id = c.user_id', 'left');
+        $builder->join('sbu s', 's.company_id = c.id', 'left');
         $builder->join('sbu_projects p', 'p.sbu_id = s.id', 'left');
 
         if (!empty($nama_pt)) {

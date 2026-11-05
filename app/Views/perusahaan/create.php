@@ -19,9 +19,19 @@
                     </div>
                 </div>
                 <div class="mb-3 row">
-                    <label class="col-sm-3 col-form-label fw-semibold">No KTA</label>
+                    <label class="col-sm-3 col-form-label fw-semibold">No KTA / NPA</label>
                     <div class="col-sm-9">
-                        <input type="text" class="form-control" name="no_kta" required placeholder="Nomor Kartu Tanda Anggota">
+                        <input type="text" class="form-control" name="no_kta" required placeholder="Contoh: 14642/P/3046.DKI">
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">Status Keanggotaan</label>
+                    <div class="col-sm-9">
+                        <select class="form-select" name="status" required>
+                            <option value="Penuh" selected>Penuh</option>
+                            <option value="Biasa">Biasa</option>
+                            <option value="Afiliasi">Afiliasi</option>
+                        </select>
                     </div>
                 </div>
                 <div class="mb-3 row">
@@ -32,6 +42,18 @@
                             <option value="Kecil">Kecil</option>
                             <option value="Menengah">Menengah</option>
                             <option value="Besar">Besar</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">Wilayah DKI Jakarta</label>
+                    <div class="col-sm-9">
+                        <select class="form-select" name="wilayah" required>
+                            <option value="Jakarta Selatan">Jakarta Selatan</option>
+                            <option value="Jakarta Pusat">Jakarta Pusat</option>
+                            <option value="Jakarta Barat">Jakarta Barat</option>
+                            <option value="Jakarta Timur">Jakarta Timur</option>
+                            <option value="Jakarta Utara">Jakarta Utara</option>
                         </select>
                     </div>
                 </div>
@@ -47,10 +69,34 @@
                         </select>
                     </div>
                 </div>
-                <div class="mb-4 row">
-                    <label class="col-sm-3 col-form-label fw-semibold">Alamat PT</label>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">Alamat Domisili PT</label>
                     <div class="col-sm-9">
-                        <textarea class="form-control" name="alamat_pt" rows="3" required placeholder="Alamat lengkap perusahaan"></textarea>
+                        <textarea class="form-control" name="alamat_pt" rows="2" required placeholder="Alamat domisili lengkap perusahaan"></textarea>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">Alamat Surat-menyurat</label>
+                    <div class="col-sm-9">
+                        <textarea class="form-control" name="alamat_surat" rows="2" placeholder="Kosongkan jika sama dengan alamat domisili"></textarea>
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">No. Telepon & Fax</label>
+                    <div class="col-sm-5 mb-2 mb-sm-0">
+                        <input type="text" class="form-control" name="telepon" placeholder="No. Telepon (Contoh: 021-7942940)">
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="fax" placeholder="No. Fax">
+                    </div>
+                </div>
+                <div class="mb-4 row">
+                    <label class="col-sm-3 col-form-label fw-semibold">Email & Website</label>
+                    <div class="col-sm-5 mb-2 mb-sm-0">
+                        <input type="email" class="form-control" name="email" placeholder="email@perusahaan.co.id">
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" class="form-control" name="website" placeholder="www.perusahaan.co.id">
                     </div>
                 </div>
                 <div class="row">

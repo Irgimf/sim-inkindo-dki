@@ -79,7 +79,7 @@
                     </select>
                 </div>
                 <div class="col-md col-12">
-                    <label class="form-label fw-semibold" style="font-size: 14px;">Kode KBLI</label>
+                    <label class="form-label fw-semibold" style="font-size: 14px;">Subklasifikasi</label>
                     <select class="form-select form-select-sm" name="kode_kbli">
                         <option value="">Semua</option>
                         <?php if(isset($kbli_list)): foreach($kbli_list as $kbli): ?>
@@ -126,8 +126,8 @@
                         <th class="text-start" width="20%">Nama PT</th>
                         <th width="10%">Kualifikasi</th>
                         <th width="12%">Kategori SBU</th>
-                        <th width="10%">Kode KBLI</th>
-                        <th width="18%">Judul KBLI</th>
+                        <th width="10%">Subklasifikasi</th>
+                        <th width="18%">Judul Subklasifikasi</th>
                         <th width="15%">Nama Pekerjaan</th>
                         <th width="10%">Nilai Proyek</th>
                     </tr>

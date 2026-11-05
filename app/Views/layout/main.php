@@ -218,6 +218,23 @@
         .badge-soft-warning { background-color: rgba(255, 193, 7, 0.15); color: #b78a06; font-weight: 600; }
         .badge-soft-danger { background-color: rgba(220, 53, 69, 0.1); color: #dc3545; font-weight: 600; }
         .badge-soft-secondary { background-color: #f1f5f9; color: var(--text-muted); font-weight: 600; }
+
+        .btn-inkindo {
+            background-color: var(--inkindo-blue);
+            color: var(--white);
+            border: 1px solid var(--inkindo-blue);
+            font-weight: 600;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(10, 100, 164, 0.2);
+            transition: all 0.2s ease;
+        }
+        .btn-inkindo:hover, .btn-inkindo:focus, .btn-inkindo:active {
+            background-color: #085287 !important;
+            border-color: #085287 !important;
+            color: var(--white) !important;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(10, 100, 164, 0.3);
+        }
     </style>
 </head>
 <body>

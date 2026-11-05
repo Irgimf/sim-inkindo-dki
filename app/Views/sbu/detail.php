@@ -33,6 +33,11 @@
                         <td class="fw-semibold"><?= esc($company['nama_pjbu']); ?></td>
                     </tr>
                     <tr>
+                        <td class="text-muted">Keanggotaan</td>
+                        <td>:</td>
+                        <td class="fw-semibold"><?= esc($company['status'] ?? 'Penuh'); ?></td>
+                    </tr>
+                    <tr>
                         <td class="text-muted">Kualifikasi</td>
                         <td>:</td>
                         <td>
@@ -61,14 +66,24 @@
             <div class="col-md-6">
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
-                        <td width="35%" class="text-muted">Nomor KTA</td>
+                        <td width="35%" class="text-muted">Nomor KTA / NPA</td>
                         <td width="5%">:</td>
                         <td class="fw-semibold"><?= esc($company['no_kta']); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Wilayah</td>
+                        <td>:</td>
+                        <td class="fw-semibold"><?= esc($company['wilayah'] ?? '-'); ?></td>
                     </tr>
                     <tr>
                         <td class="text-muted">Alamat PT</td>
                         <td>:</td>
                         <td class="fw-semibold"><?= esc($company['alamat_pt']); ?></td>
+                    </tr>
+                    <tr>
+                        <td class="text-muted">Telepon / Email</td>
+                        <td>:</td>
+                        <td class="fw-semibold"><?= esc($company['telepon'] ?? '-'); ?> / <?= esc($company['email'] ?? '-'); ?></td>
                     </tr>
                 </table>
             </div>
@@ -78,9 +93,9 @@
 
 <!-- SECTION: FORM TAMBAH SBU (INLINE) -->
 <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-        <button class="btn btn-inkindo" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormSbu" aria-expanded="false">
-            + Tambah Data KBLI (SBU)
+    <div class="card-header bg-white border-bottom-0 py-3">
+        <button class="btn btn-inkindo px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormSbu" aria-expanded="false">
+            + Tambah Data Subklasifikasi (SBU)
         </button>
     </div>
     <div class="collapse" id="collapseFormSbu">
@@ -90,32 +105,12 @@
                 <input type="hidden" name="company_id" value="<?= $companyId; ?>">
                 <div class="row">
                     <div class="col-md-4 mb-3">
-                        <label class="form-label fw-semibold">Kode KBLI</label>
-                        <select class="form-select" name="kode_kbli" id="kodeKbliSelect" required>
-                            <option value="">Pilih Kode KBLI...</option>
-                            <option value="AR001">AR001</option>
-                            <option value="AR002">AR002</option>
-                            <option value="AR003">AR003</option>
-                            <option value="RK001">RK001</option>
-                            <option value="RK002">RK002</option>
-                            <option value="AL001">AL001</option>
-                            <option value="AL002">AL002</option>
-                            <option value="AL003">AL003</option>
-                            <option value="AL004">AL004</option>
-                            <option value="PR101">PR101</option>
-                            <option value="PR102">PR102</option>
-                            <option value="PR103">PR103</option>
-                            <option value="PR104">PR104</option>
-                            <option value="PR201">PR201</option>
-                            <option value="70209">70209</option>
-                            <option value="70201">70201</option>
-                            <option value="70202">70202</option>
-                            <option value="70203">70203</option>
-                        </select>
+                        <label class="form-label fw-semibold">Subklasifikasi</label>
+                        <input type="text" class="form-control bg-white" name="kode_kbli" id="kodeKbliSelect" placeholder="Ketik Subklasifikasi (Contoh: AR001)" required>
                     </div>
                     <div class="col-md-8 mb-3">
-                        <label class="form-label fw-semibold">Judul KBLI</label>
-                        <input type="text" class="form-control bg-white" name="judul_kbli" id="judulKbliInput" readonly required>
+                        <label class="form-label fw-semibold">Judul Subklasifikasi</label>
+                        <input type="text" class="form-control bg-white" name="judul_kbli" id="judulKbliInput" placeholder="Ketik Judul Subklasifikasi" required>
                     </div>
                 </div>
                 <div class="row">
@@ -144,7 +139,7 @@
 <!-- DETAIL: DAFTAR SBU -->
 <div class="card card-custom">
     <div class="card-header bg-light fw-bold text-uppercase" style="color: var(--inkindo-blue);">
-        Daftar KBLI
+        Daftar Subklasifikasi
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -152,8 +147,8 @@
                 <thead style="background-color: var(--inkindo-blue); color: white;">
                     <tr class="text-center">
                         <th class="py-3" width="5%">No</th>
-                        <th class="py-3">Kode KBLI</th>
-                        <th class="py-3 text-start">Judul KBLI</th>
+                        <th class="py-3">Subklasifikasi</th>
+                        <th class="py-3 text-start">Judul Subklasifikasi</th>
                         <th class="py-3">Kualifikasi</th>
                         <th class="py-3">Masa Berlaku</th>
                         <th class="py-3">Aksi</th>
@@ -192,38 +187,19 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title fw-bold">Edit KBLI - <?= $s['kode_kbli']; ?></h5>
+                    <h5 class="modal-title fw-bold">Edit Subklasifikasi - <?= $s['kode_kbli']; ?></h5>
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/sbu/update/<?= $s['id']; ?>" method="post">
                     <div class="modal-body text-start">
                         <div class="row">
                             <div class="col-md-4 mb-3">
-                                <label class="form-label fw-semibold">Kode KBLI</label>
-                                <select class="form-select" name="kode_kbli" id="editKodeKbli<?= $s['id']; ?>" required onchange="updateEditJudul(<?= $s['id']; ?>)">
-                                    <option value="AR001" <?= ($s['kode_kbli'] == 'AR001') ? 'selected' : ''; ?>>AR001</option>
-                                    <option value="AR002" <?= ($s['kode_kbli'] == 'AR002') ? 'selected' : ''; ?>>AR002</option>
-                                    <option value="AR003" <?= ($s['kode_kbli'] == 'AR003') ? 'selected' : ''; ?>>AR003</option>
-                                    <option value="RK001" <?= ($s['kode_kbli'] == 'RK001') ? 'selected' : ''; ?>>RK001</option>
-                                    <option value="RK002" <?= ($s['kode_kbli'] == 'RK002') ? 'selected' : ''; ?>>RK002</option>
-                                    <option value="AL001" <?= ($s['kode_kbli'] == 'AL001') ? 'selected' : ''; ?>>AL001</option>
-                                    <option value="AL002" <?= ($s['kode_kbli'] == 'AL002') ? 'selected' : ''; ?>>AL002</option>
-                                    <option value="AL003" <?= ($s['kode_kbli'] == 'AL003') ? 'selected' : ''; ?>>AL003</option>
-                                    <option value="AL004" <?= ($s['kode_kbli'] == 'AL004') ? 'selected' : ''; ?>>AL004</option>
-                                    <option value="PR101" <?= ($s['kode_kbli'] == 'PR101') ? 'selected' : ''; ?>>PR101</option>
-                                    <option value="PR102" <?= ($s['kode_kbli'] == 'PR102') ? 'selected' : ''; ?>>PR102</option>
-                                    <option value="PR103" <?= ($s['kode_kbli'] == 'PR103') ? 'selected' : ''; ?>>PR103</option>
-                                    <option value="PR104" <?= ($s['kode_kbli'] == 'PR104') ? 'selected' : ''; ?>>PR104</option>
-                                    <option value="PR201" <?= ($s['kode_kbli'] == 'PR201') ? 'selected' : ''; ?>>PR201</option>
-                                    <option value="70209" <?= ($s['kode_kbli'] == '70209') ? 'selected' : ''; ?>>70209</option>
-                                    <option value="70201" <?= ($s['kode_kbli'] == '70201') ? 'selected' : ''; ?>>70201</option>
-                                    <option value="70202" <?= ($s['kode_kbli'] == '70202') ? 'selected' : ''; ?>>70202</option>
-                                    <option value="70203" <?= ($s['kode_kbli'] == '70203') ? 'selected' : ''; ?>>70203</option>
-                                </select>
+                                <label class="form-label fw-semibold">Subklasifikasi</label>
+                                <input type="text" class="form-control" name="kode_kbli" id="editKodeKbli<?= $s['id']; ?>" value="<?= esc($s['kode_kbli']); ?>" placeholder="Ketik Subklasifikasi" required oninput="updateEditJudul(<?= $s['id']; ?>)">
                             </div>
                             <div class="col-md-8 mb-3">
-                                <label class="form-label fw-semibold">Judul KBLI</label>
-                                <input type="text" class="form-control bg-light" name="judul_kbli" id="editJudulKbli<?= $s['id']; ?>" value="<?= esc($s['judul_kbli']); ?>" readonly required>
+                                <label class="form-label fw-semibold">Judul Subklasifikasi</label>
+                                <input type="text" class="form-control" name="judul_kbli" id="editJudulKbli<?= $s['id']; ?>" value="<?= esc($s['judul_kbli']); ?>" placeholder="Ketik Judul Subklasifikasi" required>
                             </div>
                         </div>
                         <div class="row">
@@ -242,10 +218,10 @@
                         </div>
                     </div>
                     <div class="modal-footer d-flex justify-content-between">
-                        <a href="/sbu/delete/<?= $s['id']; ?>" class="btn btn-outline-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus KBLI ini beserta seluruh proyeknya?');">Hapus KBLI</a>
+                        <a href="/sbu/delete/<?= $s['id']; ?>" class="btn btn-outline-danger" onclick="return confirm('Apakah Anda yakin ingin menghapus Subklasifikasi ini beserta seluruh proyeknya?');">Hapus Subklasifikasi</a>
                         <div>
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                            <button type="submit" class="btn btn-primary px-4">Update KBLI</button>
+                            <button type="submit" class="btn btn-primary px-4">Update Subklasifikasi</button>
                         </div>
                     </div>
                 </form>
@@ -276,27 +252,23 @@
         '70203': 'Aktivitas Konsultasi Manajemen dan Bisnis Perdagangan'
     };
 
-    // Untuk form tambah
-    document.getElementById('kodeKbliSelect')?.addEventListener('change', function() {
-        const selected = this.value;
+    // Untuk form tambah (auto-fill judul jika kode yang diketik ada di kamus dataKbli, tetap bisa diketik manual)
+    document.getElementById('kodeKbliSelect')?.addEventListener('input', function() {
+        const selected = this.value.trim().toUpperCase();
         const judulInput = document.getElementById('judulKbliInput');
         if(selected && dataKbli[selected]) {
             judulInput.value = dataKbli[selected];
-        } else {
-            judulInput.value = '';
         }
     });
 
-    // Untuk form edit (dipanggil via onchange inline pada select)
+    // Untuk form edit
     function updateEditJudul(id) {
         const selectEl = document.getElementById('editKodeKbli' + id);
         const inputEl = document.getElementById('editJudulKbli' + id);
         if(selectEl && inputEl) {
-            const selected = selectEl.value;
+            const selected = selectEl.value.trim().toUpperCase();
             if(selected && dataKbli[selected]) {
                 inputEl.value = dataKbli[selected];
-            } else {
-                inputEl.value = '';
             }
         }
     }

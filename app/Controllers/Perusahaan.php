@@ -57,18 +57,29 @@ class Perusahaan extends BaseController
     {
         $userId = session()->get('id');
         
-        // Admin bisa jadi menginput untuk user lain? Untuk simplenya admin juga akan tertaut user_id admin,
-        // namun untuk kebutuhan nyata mungkin ada dropdown. Kita buat default user_id pembuat.
         $this->companyModel->save([
-            'user_id'   => $userId,
-            'nama_pt'   => $this->request->getVar('nama_pt'),
-            'nama_pjbu' => $this->request->getVar('nama_pjbu'),
-            'no_kta'    => $this->request->getVar('no_kta'),
-            'alamat_pt' => $this->request->getVar('alamat_pt'),
-            'kualifikasi' => $this->request->getVar('kualifikasi'),
-            'kategori_sbu' => $this->request->getVar('kategori_sbu')
+            'user_id'      => $userId,
+            'nama_pt'      => $this->request->getVar('nama_pt'),
+            'nama_pjbu'    => $this->request->getVar('nama_pjbu') ?: '-',
+            'no_kta'       => $this->request->getVar('no_kta'),
+            'status'       => $this->request->getVar('status') ?: 'Penuh',
+            'kualifikasi'  => $this->request->getVar('kualifikasi'),
+            'wilayah'      => $this->request->getVar('wilayah') ?: 'Jakarta Selatan',
+            'kategori_sbu' => $this->request->getVar('kategori_sbu'),
+            'alamat_pt'    => $this->request->getVar('alamat_pt'),
+            'alamat_surat' => $this->request->getVar('alamat_surat') ?: $this->request->getVar('alamat_pt'),
+            'telepon'      => $this->request->getVar('telepon') ?: '-',
+            'fax'          => $this->request->getVar('fax') ?: '-',
+            'email'        => $this->request->getVar('email') ?: '-',
+            'website'      => $this->request->getVar('website') ?: '-',
         ]);
-        session()->setFlashdata('pesan', 'Data berhasil ditambahkan.');
+
+        $newCompanyId = (int) $this->companyModel->getInsertID();
+        if ($newCompanyId > 0) {
+            $this->companyModel->syncCompanyToMember($newCompanyId);
+        }
+
+        session()->setFlashdata('pesan', 'Data berhasil ditambahkan dan disinkronkan ke Direktori Anggota.');
         return redirect()->to('/perusahaan');
     }
 
@@ -95,14 +106,24 @@ class Perusahaan extends BaseController
         }
 
         $this->companyModel->update($id, [
-            'nama_pt' => $this->request->getVar('nama_pt'),
-            'nama_pjbu' => $this->request->getVar('nama_pjbu'),
-            'no_kta' => $this->request->getVar('no_kta'),
-            'alamat_pt' => $this->request->getVar('alamat_pt'),
-            'kualifikasi' => $this->request->getVar('kualifikasi'),
-            'kategori_sbu' => $this->request->getVar('kategori_sbu')
+            'nama_pt'      => $this->request->getVar('nama_pt'),
+            'nama_pjbu'    => $this->request->getVar('nama_pjbu') ?: '-',
+            'no_kta'       => $this->request->getVar('no_kta'),
+            'status'       => $this->request->getVar('status') ?: ($company['status'] ?? 'Penuh'),
+            'kualifikasi'  => $this->request->getVar('kualifikasi'),
+            'wilayah'      => $this->request->getVar('wilayah') ?: ($company['wilayah'] ?? 'Jakarta Selatan'),
+            'kategori_sbu' => $this->request->getVar('kategori_sbu'),
+            'alamat_pt'    => $this->request->getVar('alamat_pt'),
+            'alamat_surat' => $this->request->getVar('alamat_surat') ?: $this->request->getVar('alamat_pt'),
+            'telepon'      => $this->request->getVar('telepon') ?: '-',
+            'fax'          => $this->request->getVar('fax') ?: '-',
+            'email'        => $this->request->getVar('email') ?: '-',
+            'website'      => $this->request->getVar('website') ?: '-',
         ]);
-        session()->setFlashdata('pesan', 'Data berhasil diubah.');
+
+        $this->companyModel->syncCompanyToMember((int) $id);
+
+        session()->setFlashdata('pesan', 'Data berhasil diubah dan disinkronkan ke Direktori Anggota.');
         return redirect()->to('/perusahaan');
     }
 
@@ -113,7 +134,7 @@ class Perusahaan extends BaseController
             return redirect()->to('/perusahaan');
         }
 
-        $this->companyModel->delete($id);
+        $this->companyModel->deleteCompanyAndMember((int) $id);
         session()->setFlashdata('pesan', 'Data berhasil dihapus.');
         return redirect()->to('/perusahaan');
     }

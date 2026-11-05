@@ -41,9 +41,11 @@ class Users extends BaseController
             return redirect()->to('/dashboard');
         }
 
-        // Hapus data dependen secara manual untuk amannya jika foreign key cascade SQLite tidak jalan
+        $userCompanies = $this->companyModel->where('user_id', $id)->findAll();
+        foreach ($userCompanies as $comp) {
+            $this->companyModel->deleteCompanyAndMember((int) $comp['id']);
+        }
         $this->sbuModel->where('user_id', $id)->delete();
-        $this->companyModel->where('user_id', $id)->delete();
         $this->userModel->delete($id);
 
         session()->setFlashdata('pesan', 'Akun pengguna dan seluruh datanya berhasil dihapus.');

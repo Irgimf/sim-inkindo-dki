@@ -13,22 +13,22 @@
     </div>
 <?php endif; ?>
 
-<!-- MASTER: INFORMASI KBLI & PERUSAHAAN -->
+<!-- MASTER: INFORMASI SUBKLASIFIKASI & PERUSAHAAN -->
 <div class="card card-custom mb-4">
     <div class="card-header bg-light fw-bold text-uppercase" style="color: var(--inkindo-blue);">
-        Informasi KBLI
+        Informasi Subklasifikasi
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-6">
                 <table class="table table-sm table-borderless mb-0">
                     <tr>
-                        <td width="35%" class="text-muted">Kode KBLI</td>
+                        <td width="35%" class="text-muted">Subklasifikasi</td>
                         <td width="5%">:</td>
                         <td class="fw-semibold"><span class="badge bg-dark fs-6"><?= esc($sbu['kode_kbli']); ?></span></td>
                     </tr>
                     <tr>
-                        <td class="text-muted">Judul KBLI</td>
+                        <td class="text-muted">Judul Subklasifikasi</td>
                         <td>:</td>
                         <td class="fw-semibold"><?= esc($sbu['judul_kbli']); ?></td>
                     </tr>

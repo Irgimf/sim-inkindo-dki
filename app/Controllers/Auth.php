@@ -27,14 +27,15 @@ class Auth extends BaseController
             $pass = $data['password'];
             $verify_pass = password_verify($password, $pass);
             if($verify_pass){
+                $normalizedRole = in_array($data['role'], ['admin', 'super_admin'], true) ? 'admin' : 'user';
                 $ses_data = [
                     'id'       => $data['id'],
                     'username' => $data['username'],
-                    'role'     => $data['role'],
+                    'role'     => $normalizedRole,
                     'logged_in'=> TRUE
                 ];
                 $session->set($ses_data);
-                if ($data['role'] === 'user') {
+                if ($normalizedRole === 'user') {
                     return redirect()->to('/perusahaan');
                 }
                 return redirect()->to('/dashboard');
@@ -63,8 +64,11 @@ class Auth extends BaseController
           
         if($this->validate($rules)){
             $model = new UserModel();
+            $username = $this->request->getVar('username');
             $data = [
-                'username' => $this->request->getVar('username'),
+                'username' => $username,
+                'name'     => $username,
+                'role'     => 'user',
                 'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT)
             ];
             $model->save($data);
