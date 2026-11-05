@@ -292,9 +292,37 @@
                 <?php endif; ?>
 
                 <?php if(in_array(session()->get('role'), ['admin', 'mitra'], true)): ?>
+                <?php
+                    $dbNav = \Config\Database::connect();
+                    $pendingMitraCount = 0;
+                    $unreadMsgCount = 0;
+                    if (session()->get('role') === 'admin') {
+                        $pendingMitraCount = (int) $dbNav->table('mitra_kerja')->where('status_kemitraan', 'pending')->countAllResults();
+                        $unreadMsgCount = (int) $dbNav->table('mitra_messages')->where('is_read', 0)->countAllResults();
+                    } else {
+                        $unreadMsgCount = (int) $dbNav->table('mitra_messages m')
+                            ->join('mitra_kerja k', 'k.id = m.mitra_id', 'inner')
+                            ->where('k.user_id', session()->get('id'))
+                            ->where('m.is_read', 0)
+                            ->countAllResults();
+                    }
+                ?>
                 <li>
-                    <a href="/mitra" class="<?= (strpos(uri_string(), 'mitra') === 0) ? 'active' : '' ?>">
-                        <i class="bi bi-people-fill me-2 text-center" style="width: 20px;"></i> <span>Data Mitra Kerja</span>
+                    <a href="/mitra" class="<?= (uri_string() === 'mitra' || strpos(uri_string(), 'mitra/create') === 0 || strpos(uri_string(), 'mitra/edit') === 0 || strpos(uri_string(), 'mitra/products') === 0) ? 'active' : '' ?>">
+                        <i class="bi bi-people-fill me-2 text-center" style="width: 20px;"></i>
+                        <span>Data Mitra Kerja</span>
+                        <?php if($pendingMitraCount > 0): ?>
+                            <span class="badge rounded-pill bg-danger ms-auto" style="font-size: 11px;"><?= $pendingMitraCount; ?></span>
+                        <?php endif; ?>
+                    </a>
+                </li>
+                <li>
+                    <a href="/mitra/messages" class="<?= (strpos(uri_string(), 'mitra/messages') === 0) ? 'active' : '' ?>">
+                        <i class="bi bi-envelope-paper-fill me-2 text-center" style="width: 20px;"></i>
+                        <span>Pesan Masuk</span>
+                        <?php if($unreadMsgCount > 0): ?>
+                            <span class="badge rounded-pill bg-primary ms-auto" style="font-size: 11px;"><?= $unreadMsgCount; ?></span>
+                        <?php endif; ?>
                     </a>
                 </li>
                 <?php endif; ?>

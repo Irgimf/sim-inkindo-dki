@@ -57,11 +57,20 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
     $routes->post('update/(:num)', 'Mitra::update/$1');
     $routes->get('delete/(:num)', 'Mitra::delete/$1');
 
+    // Persetujuan Pengajuan Mitra Kerja (Admin)
+    $routes->post('approve/(:num)', 'Mitra::approve/$1');
+    $routes->post('reject/(:num)', 'Mitra::reject/$1');
+
     // Detail Produk Mitra Kerja
     $routes->get('products/(:num)', 'Mitra::products/$1');
     $routes->post('storeProduct/(:num)', 'Mitra::storeProduct/$1');
     $routes->post('updateProduct/(:num)', 'Mitra::updateProduct/$1');
     $routes->get('deleteProduct/(:num)', 'Mitra::deleteProduct/$1');
+
+    // Pesan Masuk Mitra Kerja
+    $routes->get('messages', 'Mitra::messages');
+    $routes->post('markMessageRead/(:num)', 'Mitra::markMessageRead/$1');
+    $routes->get('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
 });
 
 // Users Routes (Admin only)

@@ -21,6 +21,23 @@
 </style>
 
 <div class="row mt-2">
+    <?php
+        $dbDash = \Config\Database::connect();
+        $pendingMitraDash = $dbDash->table('mitra_kerja')->where('status_kemitraan', 'pending')->get()->getResultArray();
+        if (!empty($pendingMitraDash)):
+    ?>
+    <div class="col-12 mb-3">
+        <div class="alert alert-warning border-warning d-flex justify-content-between align-items-center flex-wrap gap-2 shadow-sm mb-0" style="border-radius: 14px;">
+            <div>
+                <i class="bi bi-bell-fill text-warning me-2"></i>
+                <strong>Notifikasi Pengajuan Mitra Kerja:</strong> Terdapat <strong><?= count($pendingMitraDash); ?> perusahaan</strong> yang mengajukan kemitraan dan menunggu persetujuan Admin.
+            </div>
+            <a href="/mitra" class="btn btn-sm btn-inkindo rounded-pill px-3">
+                Tinjau Pengajuan <i class="bi bi-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    <?php endif; ?>
     <div class="col-md-3 mb-4">
         <div class="card p-4 card-clickable" style="background-color: #e0f2fe;" onclick="showList('list-non-jk')">
             <div class="card-icon-wrap">

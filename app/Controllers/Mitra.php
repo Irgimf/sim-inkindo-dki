@@ -5,16 +5,20 @@ namespace App\Controllers;
 use App\Controllers\BaseController;
 use App\Models\MitraKerjaModel;
 use App\Models\MitraProductModel;
+use App\Models\MitraMessageModel;
 
 class Mitra extends BaseController
 {
     protected $mitraModel;
     protected $productModel;
+    protected $messageModel;
 
     public function __construct()
     {
         $this->mitraModel = new MitraKerjaModel();
         $this->productModel = new MitraProductModel();
+        $this->messageModel = new MitraMessageModel();
+        $this->mitraModel->refreshExpiredStatuses();
     }
 
     private function syncFileToProjectWeb(string $relativePath): void
@@ -68,19 +72,29 @@ class Mitra extends BaseController
         }
 
         if ($role === 'admin') {
-            $mitraList = $this->mitraModel->orderBy('id', 'DESC')->findAll();
+            // Prioritaskan pengajuan pending di urutan paling atas bagi Admin
+            $mitraList = $this->mitraModel
+                ->orderBy("CASE WHEN status_kemitraan = 'pending' THEN 0 WHEN status_kemitraan = 'expired' THEN 1 ELSE 2 END", 'ASC', false)
+                ->orderBy('id', 'DESC')
+                ->findAll();
         } else {
             $mitraList = $this->mitraModel->where('user_id', $userId)->orderBy('id', 'DESC')->findAll();
         }
 
+        $pendingList = [];
         foreach ($mitraList as &$m) {
             $m['product_count'] = $this->productModel->where('mitra_id', $m['id'])->countAllResults();
+            $m['unread_msg_count'] = $this->messageModel->where('mitra_id', $m['id'])->where('is_read', 0)->countAllResults();
+            if (($m['status_kemitraan'] ?? '') === 'pending') {
+                $pendingList[] = $m;
+            }
         }
         unset($m);
 
         $data = [
-            'title'     => 'Data Mitra Kerja',
-            'mitraList' => $mitraList,
+            'title'       => 'Data Mitra Kerja',
+            'mitraList'   => $mitraList,
+            'pendingList' => $pendingList,
         ];
         return view('mitra/index', $data);
     }
@@ -97,13 +111,13 @@ class Mitra extends BaseController
         if ($role === 'mitra') {
             $existing = $this->mitraModel->where('user_id', $userId)->first();
             if ($existing) {
-                session()->setFlashdata('pesan', 'Akun Anda sudah memiliki profil Mitra Kerja. Silakan edit data yang sudah ada atau tambahkan Detail Produk.');
+                session()->setFlashdata('pesan', 'Akun Anda sudah memiliki data Mitra Kerja. Silakan kelola atau perpanjang melalui halaman Edit.');
                 return redirect()->to('/mitra');
             }
         }
 
         return view('mitra/create', [
-            'title' => 'Tambah Data Mitra Kerja',
+            'title' => $role === 'admin' ? 'Tambah Data Mitra Kerja' : 'Form Pengajuan Mitra Kerja',
         ]);
     }
 
@@ -122,24 +136,42 @@ class Mitra extends BaseController
             return redirect()->back()->withInput();
         }
 
+        $expiredAt = trim((string) $this->request->getVar('expired_at'));
+        if ($expiredAt === '') {
+            $expiredAt = date('Y-m-d', strtotime('+1 year'));
+        }
+
         $logoPath = $this->handleUpload('logo', 'mitra_logos');
         $slug = $this->mitraModel->generateUniqueSlug($namaPerusahaan);
 
+        $isAdmin = ($role === 'admin');
+        $statusKemitraan = $isAdmin ? 'active' : 'pending';
+        $approvedAt = $isAdmin ? date('Y-m-d H:i:s') : null;
+
         $this->mitraModel->save([
-            'user_id'         => $userId,
-            'nama_perusahaan' => $namaPerusahaan,
-            'slug'            => $slug,
-            'kategori_bisnis' => trim((string) $this->request->getVar('kategori_bisnis')) ?: 'Mitra Strategis Konstruksi & Konsultansi',
-            'logo'            => $logoPath ?: 'assets/logo-inkindo.png',
-            'deskripsi'       => trim((string) $this->request->getVar('deskripsi')),
-            'alamat'          => trim((string) $this->request->getVar('alamat')) ?: '-',
-            'telepon'         => trim((string) $this->request->getVar('telepon')) ?: '-',
-            'email'           => trim((string) $this->request->getVar('email')) ?: '-',
-            'website'         => trim((string) $this->request->getVar('website')) ?: '-',
+            'user_id'          => $userId,
+            'nama_perusahaan'  => $namaPerusahaan,
+            'slug'             => $slug,
+            'kategori_bisnis'  => trim((string) $this->request->getVar('kategori_bisnis')) ?: 'Mitra Strategis Konstruksi & Konsultansi',
+            'logo'             => $logoPath ?: 'assets/logo-inkindo.png',
+            'deskripsi'        => trim((string) $this->request->getVar('deskripsi')),
+            'alamat'           => trim((string) $this->request->getVar('alamat')) ?: '-',
+            'telepon'          => trim((string) $this->request->getVar('telepon')) ?: '-',
+            'email'            => trim((string) $this->request->getVar('email')) ?: '-',
+            'website'          => trim((string) $this->request->getVar('website')) ?: '-',
+            'durasi_tahun'     => 1,
+            'status_kemitraan' => $statusKemitraan,
+            'approved_at'      => $approvedAt,
+            'expired_at'       => $expiredAt,
         ]);
 
         $newId = (int) $this->mitraModel->getInsertID();
-        session()->setFlashdata('pesan', 'Data Mitra Kerja berhasil disimpan dan logo otomatis terintegrasi ke Web Profile INKINDO.');
+        $formattedExp = date('d-m-Y', strtotime($expiredAt));
+        if ($isAdmin) {
+            session()->setFlashdata('pesan', "Data Mitra Kerja berhasil disimpan dan aktif hingga {$formattedExp}.");
+        } else {
+            session()->setFlashdata('pesan', "Pengajuan Mitra Kerja hingga tanggal {$formattedExp} berhasil dikirim! Silakan lengkapi Detail Produk sambil menunggu persetujuan Admin.");
+        }
         return redirect()->to('/mitra/products/' . $newId);
     }
 
@@ -155,7 +187,7 @@ class Mitra extends BaseController
         }
 
         return view('mitra/edit', [
-            'title' => 'Edit Data Mitra Kerja',
+            'title' => 'Edit & Perpanjangan Mitra Kerja',
             'mitra' => $mitra,
         ]);
     }
@@ -167,12 +199,14 @@ class Mitra extends BaseController
             return redirect()->to('/mitra');
         }
 
-        if (session()->get('role') !== 'admin' && $mitra['user_id'] != session()->get('id')) {
+        $role = session()->get('role');
+        if ($role !== 'admin' && $mitra['user_id'] != session()->get('id')) {
             return redirect()->to('/mitra');
         }
 
         $namaPerusahaan = trim((string) $this->request->getVar('nama_perusahaan'));
         $logoPath = $this->handleUpload('logo', 'mitra_logos');
+        $expiredAt = trim((string) $this->request->getVar('expired_at')) ?: ($mitra['expired_at'] ?? date('Y-m-d', strtotime('+1 year')));
 
         $slug = $mitra['slug'];
         if ($namaPerusahaan !== '' && $namaPerusahaan !== $mitra['nama_perusahaan']) {
@@ -188,15 +222,85 @@ class Mitra extends BaseController
             'telepon'         => trim((string) $this->request->getVar('telepon')) ?: '-',
             'email'           => trim((string) $this->request->getVar('email')) ?: '-',
             'website'         => trim((string) $this->request->getVar('website')) ?: '-',
+            'expired_at'      => $expiredAt,
         ];
 
         if ($logoPath !== null) {
             $updateData['logo'] = $logoPath;
         }
 
-        $this->mitraModel->update($id, $updateData);
+        if ($role === 'admin') {
+            $statusInput = $this->request->getVar('status_kemitraan');
+            if ($statusInput) {
+                $updateData['status_kemitraan'] = $statusInput;
+                if ($statusInput === 'active') {
+                    $updateData['alasan_penolakan'] = null;
+                }
+            }
+            if (($updateData['status_kemitraan'] ?? $mitra['status_kemitraan']) === 'active' && empty($mitra['approved_at'])) {
+                $updateData['approved_at'] = date('Y-m-d H:i:s');
+            }
+            session()->setFlashdata('pesan', 'Data Mitra Kerja berhasil diperbarui oleh Admin.');
+        } else {
+            // Jika user mitra mengajukan ulang (karena expired/rejected atau mengubah tanggal batas expired / centang ajukan)
+            $ajukanPerpanjangan = (bool) $this->request->getVar('ajukan_perpanjangan');
+            if ($ajukanPerpanjangan || in_array($mitra['status_kemitraan'], ['expired', 'rejected', 'pending'], true) || ($mitra['expired_at'] ?? '') !== $expiredAt) {
+                $updateData['status_kemitraan'] = 'pending';
+                $updateData['alasan_penolakan'] = null;
+                $formattedExp = date('d-m-Y', strtotime($expiredAt));
+                session()->setFlashdata('pesan', "Pengajuan aktivasi Mitra Kerja hingga tanggal {$formattedExp} telah dikirim ke Admin untuk diverifikasi.");
+            } else {
+                session()->setFlashdata('pesan', 'Profil Mitra Kerja berhasil diperbarui.');
+            }
+        }
 
-        session()->setFlashdata('pesan', 'Data Mitra Kerja berhasil diperbarui dan disinkronkan ke Web Profile.');
+        $this->mitraModel->update($id, $updateData);
+        return redirect()->to('/mitra');
+    }
+
+    public function approve($id)
+    {
+        if (session()->get('role') !== 'admin') {
+            return redirect()->to('/mitra');
+        }
+
+        $mitra = $this->mitraModel->find($id);
+        if (!$mitra) {
+            return redirect()->to('/mitra');
+        }
+
+        $expiredAt = trim((string) $this->request->getVar('expired_at')) ?: ($mitra['expired_at'] ?? date('Y-m-d', strtotime('+1 year')));
+        if (strtotime($expiredAt) < strtotime(date('Y-m-d'))) {
+            $expiredAt = date('Y-m-d', strtotime('+1 year'));
+        }
+
+        $this->mitraModel->update($id, [
+            'status_kemitraan' => 'active',
+            'alasan_penolakan' => null,
+            'approved_at'      => date('Y-m-d H:i:s'),
+            'expired_at'       => $expiredAt,
+        ]);
+
+        session()->setFlashdata('pesan', 'Pengajuan Mitra Kerja "' . $mitra['nama_perusahaan'] . '" disetujui (Aktif s/d ' . date('d-m-Y', strtotime($expiredAt)) . ').');
+        return redirect()->to('/mitra');
+    }
+
+    public function reject($id)
+    {
+        if (session()->get('role') !== 'admin') {
+            return redirect()->to('/mitra');
+        }
+
+        $mitra = $this->mitraModel->find($id);
+        if ($mitra) {
+            $alasan = trim((string) $this->request->getVar('alasan_penolakan'));
+            $this->mitraModel->update($id, [
+                'status_kemitraan' => 'rejected',
+                'alasan_penolakan' => $alasan !== '' ? $alasan : 'Pengajuan belum memenuhi persyaratan kemitraan.',
+            ]);
+            session()->setFlashdata('pesan', 'Pengajuan Mitra Kerja "' . $mitra['nama_perusahaan'] . '" telah ditolak beserta alasannya.');
+        }
+
         return redirect()->to('/mitra');
     }
 
@@ -212,6 +316,7 @@ class Mitra extends BaseController
         }
 
         $this->productModel->where('mitra_id', $id)->delete();
+        $this->messageModel->where('mitra_id', $id)->delete();
         $this->mitraModel->delete($id);
 
         session()->setFlashdata('pesan', 'Data Mitra Kerja beserta katalog produknya berhasil dihapus.');
@@ -313,5 +418,57 @@ class Mitra extends BaseController
         session()->setFlashdata('pesan', 'Produk berhasil dihapus.');
         return redirect()->to('/mitra/products/' . $product['mitra_id']);
     }
-}
 
+    // ================= PESAN MASUK MITRA KERJA =================
+    public function messages()
+    {
+        $role = session()->get('role');
+        $userId = session()->get('id');
+
+        if ($role === 'user') {
+            return redirect()->to('/perusahaan');
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('mitra_messages m')
+            ->select('m.*, k.nama_perusahaan as nama_mitra, k.slug as slug_mitra, k.user_id as mitra_user_id')
+            ->join('mitra_kerja k', 'k.id = m.mitra_id', 'left')
+            ->orderBy('m.id', 'DESC');
+
+        if ($role !== 'admin') {
+            $builder->where('k.user_id', $userId);
+        }
+
+        $messages = $builder->get()->getResultArray();
+
+        return view('mitra/messages', [
+            'title'    => 'Pesan Masuk Mitra Kerja',
+            'messages' => $messages,
+        ]);
+    }
+
+    public function markMessageRead($msgId)
+    {
+        $msg = $this->messageModel->find($msgId);
+        if ($msg) {
+            $mitra = $this->mitraModel->find($msg['mitra_id']);
+            if (session()->get('role') === 'admin' || ($mitra && $mitra['user_id'] == session()->get('id'))) {
+                $this->messageModel->update($msgId, ['is_read' => 1]);
+            }
+        }
+        return redirect()->to('/mitra/messages');
+    }
+
+    public function deleteMessage($msgId)
+    {
+        $msg = $this->messageModel->find($msgId);
+        if ($msg) {
+            $mitra = $this->mitraModel->find($msg['mitra_id']);
+            if (session()->get('role') === 'admin' || ($mitra && $mitra['user_id'] == session()->get('id'))) {
+                $this->messageModel->delete($msgId);
+                session()->setFlashdata('pesan', 'Pesan berhasil dihapus.');
+            }
+        }
+        return redirect()->to('/mitra/messages');
+    }
+}

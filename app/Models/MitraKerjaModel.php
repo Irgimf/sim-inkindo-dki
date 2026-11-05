@@ -23,12 +23,27 @@ class MitraKerjaModel extends Model
         'telepon',
         'email',
         'website',
+        'durasi_tahun',
+        'status_kemitraan',
+        'alasan_penolakan',
+        'approved_at',
+        'expired_at',
     ];
 
     protected $useTimestamps = true;
     protected $dateFormat    = 'datetime';
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
+
+    public function refreshExpiredStatuses(): void
+    {
+        $today = date('Y-m-d');
+        $this->db->table($this->table)
+            ->where('status_kemitraan', 'active')
+            ->where('expired_at IS NOT NULL', null, false)
+            ->where('expired_at <', $today)
+            ->update(['status_kemitraan' => 'expired']);
+    }
 
     public function generateUniqueSlug(string $namaPerusahaan, ?int $ignoreId = null): string
     {
@@ -55,4 +70,3 @@ class MitraKerjaModel extends Model
         return $slug;
     }
 }
-

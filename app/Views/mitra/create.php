@@ -2,9 +2,13 @@
 
 <?= $this->section('content') ?>
 <div class="mb-4 mt-2">
-    <a href="/mitra" class="btn btn-outline-secondary btn-sm mb-3"><i class="bi bi-arrow-left"></i> Kembali ke Daftar Mitra Kerja</a>
+    <a href="/mitra" class="btn btn-outline-secondary btn-sm mb-3"><i class="bi bi-arrow-left"></i> Kembali ke Data Mitra Kerja</a>
     <h3 class="fw-bold" style="color: var(--inkindo-blue);"><?= esc($title); ?></h3>
-    <p class="text-muted small">Logo yang di-upload akan otomatis tampil pada Marquee Halaman Utama, Menu Samping Kiri, dan Halaman Mitra Kerja di Web Profile INKINDO DKI Jakarta.</p>
+    <?php if(session()->get('role') === 'admin'): ?>
+        <p class="text-muted small">Tambahkan Mitra Kerja baru beserta tanggal batas berlaku kemitraannya.</p>
+    <?php else: ?>
+        <p class="text-muted small">Isi profil perusahaan, upload logo, dan pilih tanggal batas berakhirnya kemitraan yang diajukan melalui kalender. Setelah disetujui Admin, halaman web dan logo Mitra Kerja Anda akan otomatis aktif di Web Profile INKINDO DKI Jakarta.</p>
+    <?php endif; ?>
 </div>
 
 <?php if(session()->getFlashdata('error')): ?>
@@ -32,14 +36,20 @@
                 </div>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <label class="form-label fw-semibold">Nama Perusahaan Mitra Kerja <span class="text-danger">*</span></label>
                 <input type="text" class="form-control" name="nama_perusahaan" placeholder="Contoh: PT Granitoguna Building Ceramics" required>
             </div>
 
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="form-label fw-semibold">Kategori / Bidang Kemitraan</label>
-                <input type="text" class="form-control" name="kategori_bisnis" placeholder="Contoh: Produsen Material Bangunan / Suplier / Kontraktor" value="Produsen Material & Solusi Konstruksi">
+                <input type="text" class="form-control" name="kategori_bisnis" placeholder="Contoh: Produsen Material Bangunan" value="Produsen Material & Solusi Konstruksi">
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label fw-semibold">Berlaku Sampai Tanggal <span class="text-danger">*</span></label>
+                <input type="date" name="expired_at" class="form-control" min="<?= date('Y-m-d', strtotime('+1 day')); ?>" value="<?= date('Y-m-d', strtotime('+1 year')); ?>" required>
+                <small class="text-muted">Pilih batas tanggal berakhir kemitraan</small>
             </div>
 
             <div class="col-md-12">
@@ -70,7 +80,8 @@
 
         <div class="mt-4 pt-2 d-flex gap-2">
             <button type="submit" class="btn btn-inkindo px-4 py-2">
-                <i class="bi bi-check2-circle me-1"></i> Simpan & Lanjut Isi Detail Produk
+                <i class="bi bi-send-check me-1"></i>
+                <?= session()->get('role') === 'admin' ? 'Simpan & Aktifkan Mitra Kerja' : 'Ajukan Mitra Kerja & Lanjut Isi Produk'; ?>
             </button>
             <a href="/mitra" class="btn btn-secondary px-4 py-2">Batal</a>
         </div>
@@ -94,4 +105,3 @@ document.getElementById('logoInput').addEventListener('change', function(e) {
 });
 </script>
 <?= $this->endSection() ?>
-
