@@ -13,6 +13,9 @@ class Dashboard extends BaseController
         if (session()->get('role') === 'user') {
             return redirect()->to('/perusahaan');
         }
+        if (session()->get('role') === 'mitra') {
+            return redirect()->to('/mitra');
+        }
 
         $companyModel = new CompanyModel();
         $companies = $companyModel->findAll();

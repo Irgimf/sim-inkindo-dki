@@ -271,6 +271,7 @@
                 </li>
                 <?php endif; ?>
                 
+                <?php if(in_array(session()->get('role'), ['admin', 'user'], true)): ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#anggotaCollapse" aria-expanded="<?= (strpos(uri_string(), 'perusahaan') === 0 || strpos(uri_string(), 'sbu') === 0) ? 'true' : 'false' ?>">
                         <i class="bi bi-person-badge-fill me-2 text-center" style="width: 20px;"></i> <span>Anggota</span>
@@ -288,6 +289,15 @@
                         </li>
                     </ul>
                 </li>
+                <?php endif; ?>
+
+                <?php if(in_array(session()->get('role'), ['admin', 'mitra'], true)): ?>
+                <li>
+                    <a href="/mitra" class="<?= (strpos(uri_string(), 'mitra') === 0) ? 'active' : '' ?>">
+                        <i class="bi bi-people-fill me-2 text-center" style="width: 20px;"></i> <span>Data Mitra Kerja</span>
+                    </a>
+                </li>
+                <?php endif; ?>
                 
                 <?php if(session()->get('role') === 'admin'): ?>
                 <li>
@@ -309,8 +319,13 @@
         <div class="flex-grow-1 main-content-wrapper">
             <!-- Navbar Atas -->
             <nav class="navbar navbar-expand-lg bg-transparent px-4 py-4 mb-2">
-                <div class="container-fluid">
-                    <span class="navbar-brand mb-0" style="font-size: 22px; font-weight: 700; color: var(--text-dark);">Sistem Manajemen Data PT</span>
+                <div class="container-fluid d-flex justify-content-between align-items-center">
+                    <span class="navbar-brand mb-0" style="font-size: 22px; font-weight: 700; color: var(--text-dark);">
+                        <?= session()->get('role') === 'mitra' ? 'Sistem Manajemen Mitra Kerja' : 'Sistem Manajemen Data PT' ?>
+                    </span>
+                    <a href="http://localhost:8000" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+                        <i class="bi bi-globe2 me-1"></i> Lihat Web Profile
+                    </a>
                 </div>
             </nav>
 

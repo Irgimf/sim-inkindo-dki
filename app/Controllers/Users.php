@@ -3,23 +3,24 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
-use CodeIgniter\HTTP\ResponseInterface;
-
 use App\Models\UserModel;
 use App\Models\CompanyModel;
 use App\Models\SbuModel;
+use App\Models\MitraKerjaModel;
 
 class Users extends BaseController
 {
     protected $userModel;
     protected $companyModel;
     protected $sbuModel;
+    protected $mitraModel;
 
     public function __construct()
     {
         $this->userModel = new UserModel();
         $this->companyModel = new CompanyModel();
         $this->sbuModel = new SbuModel();
+        $this->mitraModel = new MitraKerjaModel();
     }
 
     public function index()
@@ -30,7 +31,7 @@ class Users extends BaseController
 
         $data = [
             'title' => 'Kelola Pengguna',
-            'users' => $this->userModel->where('role', 'user')->findAll()
+            'users' => $this->userModel->whereIn('role', ['user', 'mitra'])->findAll(),
         ];
         return view('users/index', $data);
     }
@@ -46,6 +47,7 @@ class Users extends BaseController
             $this->companyModel->deleteCompanyAndMember((int) $comp['id']);
         }
         $this->sbuModel->where('user_id', $id)->delete();
+        $this->mitraModel->where('user_id', $id)->delete();
         $this->userModel->delete($id);
 
         session()->setFlashdata('pesan', 'Akun pengguna dan seluruh datanya berhasil dihapus.');

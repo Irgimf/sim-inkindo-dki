@@ -5,12 +5,18 @@ use CodeIgniter\Router\RouteCollection;
 /** @var RouteCollection $routes */
 $routes->get('/', 'Auth::login');
 
-// Auth Routes
+// Auth Routes (Anggota)
 $routes->get('/auth/login', 'Auth::login');
 $routes->post('/auth/processLogin', 'Auth::processLogin');
 $routes->get('/auth/register', 'Auth::register');
 $routes->post('/auth/processRegister', 'Auth::processRegister');
 $routes->get('/auth/logout', 'Auth::logout');
+
+// Auth Routes (Mitra Kerja)
+$routes->get('/mitra/login', 'Auth::mitraLogin');
+$routes->post('/mitra/processLogin', 'Auth::processMitraLogin');
+$routes->get('/mitra/register', 'Auth::mitraRegister');
+$routes->post('/mitra/processRegister', 'Auth::processMitraRegister');
 
 // Dashboard Route
 $routes->get('/dashboard', 'Dashboard::index', ['filter' => 'auth']);
@@ -40,6 +46,22 @@ $routes->group('sbu', ['filter' => 'auth'], static function ($routes) {
     $routes->post('storeProject/(:num)', 'Sbu::storeProject/$1');
     $routes->post('updateProject/(:num)', 'Sbu::updateProject/$1');
     $routes->get('deleteProject/(:num)', 'Sbu::deleteProject/$1');
+});
+
+// Mitra Kerja Management Routes
+$routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
+    $routes->get('/', 'Mitra::index');
+    $routes->get('create', 'Mitra::create');
+    $routes->post('store', 'Mitra::store');
+    $routes->get('edit/(:num)', 'Mitra::edit/$1');
+    $routes->post('update/(:num)', 'Mitra::update/$1');
+    $routes->get('delete/(:num)', 'Mitra::delete/$1');
+
+    // Detail Produk Mitra Kerja
+    $routes->get('products/(:num)', 'Mitra::products/$1');
+    $routes->post('storeProduct/(:num)', 'Mitra::storeProduct/$1');
+    $routes->post('updateProduct/(:num)', 'Mitra::updateProduct/$1');
+    $routes->get('deleteProduct/(:num)', 'Mitra::deleteProduct/$1');
 });
 
 // Users Routes (Admin only)

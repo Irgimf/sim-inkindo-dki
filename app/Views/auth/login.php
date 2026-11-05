@@ -351,6 +351,16 @@
         </div>
     </div>
 
+    <div style="margin-top: 18px; display: flex; gap: 20px; align-items: center; font-size: 13.5px;">
+        <a href="http://localhost:8000" style="color: #64748b; text-decoration: none; font-weight: 500;">
+            <i class="bi bi-arrow-left"></i> Kembali ke Web Profile INKINDO
+        </a>
+        <span style="color: #cbd5e1;">|</span>
+        <a href="/mitra/login" style="color: var(--inkindo-blue); text-decoration: none; font-weight: 600;">
+            Portal Login Mitra Kerja <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
     <script>
         const authWrapper = document.getElementById('authWrapper');
         const registerBtn = document.getElementById('registerBtn');
