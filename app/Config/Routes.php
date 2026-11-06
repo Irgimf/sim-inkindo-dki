@@ -73,6 +73,17 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
     $routes->get('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
 });
 
+// Admin CMS Berita & Informasi Routes
+$routes->group('cms', ['filter' => 'auth'], static function ($routes) {
+    $routes->get('/', 'Cms::index');
+    $routes->post('updateHomepageSlots', 'Cms::updateHomepageSlots');
+    $routes->get('create', 'Cms::create');
+    $routes->post('store', 'Cms::store');
+    $routes->get('edit/(:num)', 'Cms::edit/$1');
+    $routes->post('update/(:num)', 'Cms::update/$1');
+    $routes->get('delete/(:num)', 'Cms::delete/$1');
+});
+
 // Users Routes (Admin only)
 $routes->group('users', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'Users::index');

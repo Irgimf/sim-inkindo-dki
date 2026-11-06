@@ -329,6 +329,11 @@
                 
                 <?php if(session()->get('role') === 'admin'): ?>
                 <li>
+                    <a href="/cms" class="<?= (strpos(uri_string(), 'cms') === 0) ? 'active' : '' ?>">
+                        <i class="bi bi-newspaper me-2 text-center" style="width: 20px;"></i> <span>Admin CMS</span>
+                    </a>
+                </li>
+                <li>
                     <a href="/users" class="<?= (strpos(uri_string(), 'users') === 0) ? 'active' : '' ?>">
                         <i class="bi bi-people me-2 text-center" style="width: 20px;"></i> <span>Kelola Pengguna</span>
                     </a>
