@@ -121,7 +121,7 @@ class Cms extends BaseController
         $filterTipe = trim((string) $this->request->getGet('tipe'));
         $validTypes = ['agenda', 'rilis', 'publikasi', 'galeri', 'emagazine', 'karya'];
 
-        $allItems = $this->cmsModel->orderBy('id', 'DESC')->findAll();
+        $allItems = $this->cmsModel->orderBy('tanggal', 'DESC')->orderBy('id', 'DESC')->findAll();
         if (in_array($filterTipe, $validTypes, true)) {
             $items = array_values(array_filter($allItems, fn($row) => $row['tipe'] === $filterTipe));
         } else {
