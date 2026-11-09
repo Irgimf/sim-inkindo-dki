@@ -17,6 +17,7 @@ class Sbu extends BaseController
 
     public function __construct()
     {
+        CompanyModel::ensureJenisSbuColumn();
         $this->sbuModel = new SbuModel();
         $this->companyModel = new CompanyModel();
         $this->sbuProjectModel = new SbuProjectModel();
@@ -95,16 +96,24 @@ class Sbu extends BaseController
             return redirect()->to('/sbu');
         }
         
+        $kodeKbli = (string) $this->request->getVar('kode_kbli');
+        $jenisSbu = CompanyModel::resolveJenisSbu(
+            (string) $this->request->getVar('jenis_sbu'),
+            $kodeKbli,
+            (string) ($company['kategori_sbu'] ?? 'Jasa Konstruksi')
+        );
+
         $this->sbuModel->save([
             'user_id'     => $company['user_id'], // Keep user_id for backward compatibility/DB constraint
             'company_id'  => $companyId,
-            'kode_kbli'   => $this->request->getVar('kode_kbli'),
+            'jenis_sbu'   => $jenisSbu,
+            'kode_kbli'   => $kodeKbli,
             'judul_kbli'  => $this->request->getVar('judul_kbli'),
             'kualifikasi' => $this->request->getVar('kualifikasi'),
             'masa_berlaku'=> $this->request->getVar('masa_berlaku')
         ]);
         $this->companyModel->syncCompanyToMember((int) $companyId);
-        session()->setFlashdata('pesan', 'Data SBU berhasil ditambahkan.');
+        session()->setFlashdata('pesan', 'Data SBU (' . $jenisSbu . ') berhasil ditambahkan.');
         return redirect()->to('/sbu/detail/' . $companyId);
     }
 
@@ -118,8 +127,17 @@ class Sbu extends BaseController
             return redirect()->to('/sbu');
         }
 
+        $company = $this->companyModel->find($sbu['company_id']);
+        $kodeKbli = (string) $this->request->getVar('kode_kbli');
+        $jenisSbu = CompanyModel::resolveJenisSbu(
+            (string) ($this->request->getVar('jenis_sbu') ?? ($sbu['jenis_sbu'] ?? '')),
+            $kodeKbli,
+            (string) ($company['kategori_sbu'] ?? 'Jasa Konstruksi')
+        );
+
         $this->sbuModel->update($id, [
-            'kode_kbli'   => $this->request->getVar('kode_kbli'),
+            'jenis_sbu'   => $jenisSbu,
+            'kode_kbli'   => $kodeKbli,
             'judul_kbli'  => $this->request->getVar('judul_kbli'),
             'kualifikasi' => $this->request->getVar('kualifikasi'),
             'masa_berlaku'=> $this->request->getVar('masa_berlaku')

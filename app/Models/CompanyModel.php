@@ -94,10 +94,57 @@ class CompanyModel extends Model
     }
 
     /**
+     * Ensure `jenis_sbu` column exists on `sbu` table.
+     */
+    public static function ensureJenisSbuColumn(): void
+    {
+        try {
+            $db = \Config\Database::connect();
+            if ($db->tableExists('sbu') && !$db->fieldExists('jenis_sbu', 'sbu')) {
+                $db->query("ALTER TABLE `sbu` ADD COLUMN `jenis_sbu` VARCHAR(50) NULL DEFAULT NULL AFTER `company_id`");
+            }
+        } catch (\Throwable $e) {
+            // Ignore if already exists
+        }
+    }
+
+    /**
+     * Resolve whether an SBU row belongs to 'Jasa Konstruksi' or 'Non Jasa Konstruksi'.
+     */
+    public static function resolveJenisSbu(?string $jenisSbu, string $kodeKbli = '', string $companyKategori = 'Jasa Konstruksi'): string
+    {
+        $kat = trim($companyKategori);
+        if ($kat === 'Non Jasa Konstruksi') {
+            return 'Non Jasa Konstruksi';
+        }
+        if ($kat === 'Jasa Konstruksi') {
+            return 'Jasa Konstruksi';
+        }
+
+        // Company has both JK and NJK ('NJK dan JK' / 'Jasa Konstruksi dan Non Jasa Konstruksi')
+        $jenis = trim((string) $jenisSbu);
+        if ($jenis === 'Non Jasa Konstruksi' || strtoupper($jenis) === 'NJK') {
+            return 'Non Jasa Konstruksi';
+        }
+        if ($jenis === 'Jasa Konstruksi' || strtoupper($jenis) === 'JK') {
+            return 'Jasa Konstruksi';
+        }
+
+        // Fallback inference from Kode KBLI for legacy rows without explicit jenis_sbu
+        $kode = strtoupper(trim($kodeKbli));
+        if ($kode !== '' && (preg_match('/^[0-9]/', $kode) || str_starts_with($kode, 'NJK') || str_starts_with($kode, 'SC') || str_starts_with($kode, 'MS'))) {
+            return 'Non Jasa Konstruksi';
+        }
+        return 'Jasa Konstruksi';
+    }
+
+    /**
      * Sync a single company and its SBU rows to the `members` table used by ProjectWeb (Laravel).
      */
     public function syncCompanyToMember(int $companyId): void
     {
+        self::ensureJenisSbuColumn();
+
         $company = $this->find($companyId);
         if (!$company) {
             return;
@@ -115,10 +162,12 @@ class CompanyModel extends Model
             $subLabel = trim(($s['kode_kbli'] ?? '') . ' - ' . ($s['judul_kbli'] ?? ''), ' -');
             $kelas = $s['kualifikasi'] ?: ($company['kualifikasi'] ?: 'Menengah');
             $masa = !empty($s['masa_berlaku']) ? date('d-m-Y', strtotime($s['masa_berlaku'])) : '-';
+            $jenisSbu = self::resolveJenisSbu($s['jenis_sbu'] ?? null, (string) ($s['kode_kbli'] ?? ''), (string) ($company['kategori_sbu'] ?? 'Jasa Konstruksi'));
 
             if ($subLabel !== '') {
                 $sbuItems[] = [
                     'code'        => $subLabel,
+                    'jenis'       => $jenisSbu,
                     'kelas'       => $kelas,
                     'masaBerlaku' => $masa,
                     'subbidang'   => [],

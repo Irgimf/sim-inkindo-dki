@@ -12,7 +12,7 @@ class SbuModel extends Model
     protected $returnType       = 'array';
     protected $useSoftDeletes   = false;
     protected $protectFields    = true;
-    protected $allowedFields    = ['user_id', 'company_id', 'kode_kbli', 'judul_kbli', 'kualifikasi', 'masa_berlaku'];
+    protected $allowedFields    = ['user_id', 'company_id', 'jenis_sbu', 'kode_kbli', 'judul_kbli', 'kualifikasi', 'masa_berlaku'];
 
     protected bool $allowEmptyInserts = false;
     protected bool $updateOnlyChanged = true;
