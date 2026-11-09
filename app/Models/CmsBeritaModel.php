@@ -33,6 +33,7 @@ class CmsBeritaModel extends Model
         'konten',
         'galeri_foto_json',
         'homepage_slot',
+        'publikasi_slot',
     ];
 
     protected $useTimestamps = true;

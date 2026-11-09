@@ -27,9 +27,9 @@
         $groupedForDropdown[$t][] = $row;
     }
 
-    $renderCustomDropdown = function($slotNum, $slotItem, $name) use ($groupedForDropdown, $tipeMap) {
+    $renderCustomDropdown = function($slotNum, $slotItem, $name, ?string $prioritizeType = null, string $emptyLabel = '-- Pilih Konten (Kosongkan Slot) --') use ($groupedForDropdown, $tipeMap) {
         $currentId = (int)($slotItem['id'] ?? 0);
-        $currentLabel = '-- Pilih Konten (Kosongkan Slot) --';
+        $currentLabel = $emptyLabel;
         $currentFullTitle = $currentLabel;
         if ($slotItem) {
             $tgl = !empty($slotItem['tanggal_label']) ? '[' . $slotItem['tanggal_label'] . '] ' : '';
@@ -37,10 +37,17 @@
             $currentLabel = $tgl . mb_strimwidth($slotItem['judul'], 0, 42, '...');
         }
 
+        $orderedTipeMap = $tipeMap;
+        if ($prioritizeType && isset($orderedTipeMap[$prioritizeType])) {
+            $prioritized = [$prioritizeType => $orderedTipeMap[$prioritizeType]];
+            unset($orderedTipeMap[$prioritizeType]);
+            $orderedTipeMap = $prioritized + $orderedTipeMap;
+        }
+
         ob_start();
         ?>
-        <div class="custom-slot-dropdown position-relative mb-2" data-slot="<?= $slotNum; ?>">
-            <input type="hidden" name="<?= esc($name); ?>" id="input_slot_<?= $slotNum; ?>" value="<?= $currentId; ?>">
+        <div class="custom-slot-dropdown position-relative mb-2" data-slot="<?= esc((string)$slotNum); ?>">
+            <input type="hidden" name="<?= esc($name); ?>" id="input_<?= esc($name); ?>" value="<?= $currentId; ?>">
             <button type="button" class="btn btn-sm w-100 bg-white border text-start d-flex justify-content-between align-items-center py-2 px-3 rounded-2 shadow-none slot-trigger-btn"
                     data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false"
                     title="<?= esc($currentFullTitle); ?>" style="border-color: #cbd5e1 !important;">
@@ -59,10 +66,10 @@
                 </div>
                 <div class="slot-items-container">
                     <a class="dropdown-item rounded-2 py-1.5 px-2 small fw-semibold text-danger slot-option-item <?= $currentId === 0 ? 'active bg-danger text-white' : ''; ?>"
-                       href="javascript:void(0)" data-id="0" data-label="-- Pilih Konten (Kosongkan Slot) --" title="-- Kosongkan Slot Ini --">
-                        <i class="bi bi-x-circle me-1"></i> -- Kosongkan Slot Ini --
+                       href="javascript:void(0)" data-id="0" data-label="<?= esc($emptyLabel); ?>" title="<?= esc($emptyLabel); ?>">
+                        <i class="bi bi-x-circle me-1"></i> <?= esc($emptyLabel); ?>
                     </a>
-                    <?php foreach ($tipeMap as $typeKey => $meta): ?>
+                    <?php foreach ($orderedTipeMap as $typeKey => $meta): ?>
                         <?php $list = $groupedForDropdown[$typeKey] ?? []; ?>
                         <?php if (empty($list)) continue; ?>
                         <div class="slot-group-block mb-1">
@@ -99,12 +106,37 @@
         <?php
         return ob_get_clean();
     };
+
+    $pubSlots = $pubSlots ?? array_fill(1, 8, null);
+    $usedPubIds = [];
+    foreach ($pubSlots as $ps) {
+        if ($ps && isset($ps['id'])) {
+            $usedPubIds[(int)$ps['id']] = true;
+        }
+    }
+    $pubFallbackPool = [];
+    foreach (($groupedForDropdown['publikasi'] ?? []) as $pubRow) {
+        if (!isset($usedPubIds[(int)$pubRow['id']])) {
+            $pubFallbackPool[] = $pubRow;
+        }
+    }
+    $effectivePubSlots = [];
+    $fbIdx = 0;
+    for ($s = 1; $s <= 8; $s++) {
+        if (!empty($pubSlots[$s])) {
+            $effectivePubSlots[$s] = ['item' => $pubSlots[$s], 'is_manual' => true];
+        } elseif (isset($pubFallbackPool[$fbIdx])) {
+            $effectivePubSlots[$s] = ['item' => $pubFallbackPool[$fbIdx++], 'is_manual' => false];
+        } else {
+            $effectivePubSlots[$s] = ['item' => null, 'is_manual' => false];
+        }
+    }
 ?>
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-2 flex-wrap gap-3">
     <div>
         <h3 class="fw-bold mb-1" style="color: var(--inkindo-blue);">Admin CMS — Halaman Utama (Beranda)</h3>
-        <p class="text-muted small mb-0">Kelola <strong>Teks Bergerak</strong>, <strong>Banner Utama (Hero Carousel)</strong>, <strong>Gambar Background Utama</strong>, serta <strong>3 Berita Pilihan</strong> di beranda WebProfile (`index.html`).</p>
+        <p class="text-muted small mb-0">Kelola <strong>Teks Bergerak</strong>, <strong>Banner Utama (Hero Carousel)</strong>, <strong>Gambar Background Utama</strong>, <strong>3 Berita Pilihan</strong>, serta <strong>8 Publikasi Beranda (Grid 4×2)</strong> di WebProfile (`index.html`).</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="http://localhost:8000/index.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
@@ -459,6 +491,76 @@
             <div class="mt-3 text-end">
                 <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background-color: var(--inkindo-blue); border: none;">
                     <i class="bi bi-check2-circle me-1"></i> Simpan Berita Pilihan Beranda
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= SEKSI 5: 8 PUBLIKASI DI HALAMAN UTAMA (GRID 4x2) ================= -->
+<div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); border-left: 5px solid var(--inkindo-blue) !important;">
+    <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 pb-2 border-bottom">
+            <div>
+                <h5 class="fw-bold mb-1 text-dark">
+                    <i class="bi bi-grid-3x2-gap-fill text-primary me-2"></i>5. Pengaturan Publikasi di Halaman Utama (Layout 4×2 — 8 Konten)
+                </h5>
+                <p class="text-muted small mb-0">
+                    Pilih hingga 8 konten yang akan ditampilkan pada seksi <strong>Publikasi</strong> (4 ke samping × 2 ke bawah) tepat di bawah Berita &amp; Informasi di halaman utama (`index.html`). Slot yang dibiarkan kosong akan otomatis terisi dengan Publikasi terbaru.
+                </p>
+            </div>
+            <a href="http://localhost:8000/index.html#publikasi-beranda" target="_blank" class="btn btn-sm btn-light border rounded-pill px-3 fw-semibold text-primary">
+                <i class="bi bi-eye me-1"></i> Pratinjau Seksi Publikasi Beranda
+            </a>
+        </div>
+
+        <form action="/cms/updatePublikasiSlots" method="post">
+            <div class="row g-3 align-items-stretch">
+                <?php for ($p = 1; $p <= 8; $p++): ?>
+                    <?php
+                        $manualItem = $pubSlots[$p] ?? null;
+                        $effData = $effectivePubSlots[$p] ?? ['item' => null, 'is_manual' => false];
+                        $previewItem = $effData['item'];
+                        $isManual = $effData['is_manual'];
+                        $baris = ($p <= 4) ? 1 : 2;
+                        $kolom = (($p - 1) % 4) + 1;
+                    ?>
+                    <div class="col-md-6 col-xl-3">
+                        <div class="p-3 rounded-3 h-100 d-flex flex-column justify-content-between" style="background: #ffffff; border: 1px solid #e2e8f0;">
+                            <div>
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <span class="badge rounded-pill px-2.5 py-1" style="background: <?= $baris === 1 ? 'var(--inkindo-blue)' : '#0284c7'; ?>; color: #fff; font-size: 11px;">
+                                        Slot <?= $p; ?> • Baris <?= $baris; ?> Kolom <?= $kolom; ?>
+                                    </span>
+                                    <?php if ($isManual): ?>
+                                        <small class="text-success fw-semibold" style="font-size: 11px;"><i class="bi bi-pin-angle-fill"></i> Dipilih</small>
+                                    <?php else: ?>
+                                        <small class="text-muted fw-semibold" style="font-size: 11px;"><i class="bi bi-magic"></i> Otomatis</small>
+                                    <?php endif; ?>
+                                </div>
+
+                                <?= $renderCustomDropdown('pub_' . $p, $manualItem, 'pub_slot_' . $p, 'publikasi', '-- Otomatis (Publikasi Terbaru) --'); ?>
+                            </div>
+
+                            <?php if ($previewItem): ?>
+                                <div class="d-flex align-items-center gap-2 mt-2 pt-2 border-top">
+                                    <img src="<?= esc($resolveImgUrl($previewItem['gambar'])); ?>" alt="" style="width: 48px; height: 36px; object-fit: cover; border-radius: 6px; flex-shrink: 0;">
+                                    <div class="small text-truncate" style="min-width: 0;">
+                                        <div class="fw-bold text-dark text-truncate" title="<?= esc($previewItem['judul']); ?>"><?= esc($previewItem['judul']); ?></div>
+                                        <div class="text-muted text-truncate" style="font-size: 10.5px;">
+                                            <?= esc($previewItem['tanggal_label']); ?> | <?= esc($previewItem['kategori_label']); ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                <?php endfor; ?>
+            </div>
+
+            <div class="mt-3 text-end">
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold" style="background-color: var(--inkindo-blue); border: none;">
+                    <i class="bi bi-check2-circle me-1"></i> Simpan Publikasi Beranda (4×2)
                 </button>
             </div>
         </form>

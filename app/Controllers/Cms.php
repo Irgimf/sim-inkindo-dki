@@ -152,6 +152,10 @@ class Cms extends BaseController
                 ];
                 $db->table('cms_hero_backgrounds')->insertBatch($defaultBgs);
             }
+
+            if ($db->tableExists('cms_berita') && !$db->fieldExists('publikasi_slot', 'cms_berita')) {
+                $db->query("ALTER TABLE `cms_berita` ADD COLUMN `publikasi_slot` INT NOT NULL DEFAULT 0 AFTER `homepage_slot`");
+            }
         } catch (\Throwable $e) {
             // Ignore DB init exception gracefully
         }
@@ -377,11 +381,17 @@ class Cms extends BaseController
         $slot1 = null;
         $slot2 = null;
         $slot3 = null;
+        $pubSlots = array_fill(1, 8, null);
         foreach ($allItems as $row) {
             $slot = (int) ($row['homepage_slot'] ?? 0);
             if ($slot === 1) $slot1 = $row;
             if ($slot === 2) $slot2 = $row;
             if ($slot === 3) $slot3 = $row;
+
+            $pSlot = (int) ($row['publikasi_slot'] ?? 0);
+            if ($pSlot >= 1 && $pSlot <= 8) {
+                $pubSlots[$pSlot] = $row;
+            }
         }
 
         $banners = $this->bannerModel->orderBy('urutan', 'ASC')->orderBy('id', 'ASC')->findAll();
@@ -397,6 +407,7 @@ class Cms extends BaseController
             'slot1'       => $slot1,
             'slot2'       => $slot2,
             'slot3'       => $slot3,
+            'pubSlots'    => $pubSlots,
         ]);
     }
 
@@ -424,6 +435,32 @@ class Cms extends BaseController
         }
 
         session()->setFlashdata('pesan', 'Pengaturan 3 konten Berita Pilihan pada Halaman Utama (Beranda WebProfile) berhasil diperbarui.');
+        return redirect()->to('/cms/homepage');
+    }
+
+    public function updatePublikasiSlots()
+    {
+        if ($redir = $this->ensureAdmin()) {
+            return $redir;
+        }
+
+        $db = \Config\Database::connect();
+        if (!$db->fieldExists('publikasi_slot', 'cms_berita')) {
+            $db->query("ALTER TABLE `cms_berita` ADD COLUMN `publikasi_slot` INT NOT NULL DEFAULT 0 AFTER `homepage_slot`");
+        }
+
+        $db->table('cms_berita')->update(['publikasi_slot' => 0]);
+
+        $usedIds = [];
+        for ($i = 1; $i <= 8; $i++) {
+            $itemId = (int) $this->request->getPost('pub_slot_' . $i);
+            if ($itemId > 0 && !in_array($itemId, $usedIds, true)) {
+                $db->table('cms_berita')->where('id', $itemId)->update(['publikasi_slot' => $i]);
+                $usedIds[] = $itemId;
+            }
+        }
+
+        session()->setFlashdata('pesan', 'Pengaturan 8 konten Publikasi (Grid 4x2) pada Halaman Utama berhasil diperbarui.');
         return redirect()->to('/cms/homepage');
     }
 

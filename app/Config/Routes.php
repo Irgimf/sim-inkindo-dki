@@ -78,6 +78,7 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'Cms::index');
     $routes->get('homepage', 'Cms::homepage');
     $routes->post('updateHomepageSlots', 'Cms::updateHomepageSlots');
+    $routes->post('updatePublikasiSlots', 'Cms::updatePublikasiSlots');
     $routes->post('banner/save', 'Cms::saveHeroBanner');
     $routes->get('banner/delete/(:num)', 'Cms::deleteHeroBanner/$1');
     $routes->get('banner/toggle/(:num)', 'Cms::toggleHeroBanner/$1');
