@@ -73,10 +73,21 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
     $routes->get('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
 });
 
-// Admin CMS Berita & Informasi Routes
+// Admin CMS Berita & Informasi & Halaman Utama Routes
 $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'Cms::index');
+    $routes->get('homepage', 'Cms::homepage');
     $routes->post('updateHomepageSlots', 'Cms::updateHomepageSlots');
+    $routes->post('banner/save', 'Cms::saveHeroBanner');
+    $routes->get('banner/delete/(:num)', 'Cms::deleteHeroBanner/$1');
+    $routes->get('banner/toggle/(:num)', 'Cms::toggleHeroBanner/$1');
+    $routes->post('phrase/save', 'Cms::saveHeroPhrase');
+    $routes->get('phrase/delete/(:num)', 'Cms::deleteHeroPhrase/$1');
+    $routes->get('phrase/toggle/(:num)', 'Cms::toggleHeroPhrase/$1');
+    $routes->post('background/save', 'Cms::saveHeroBackground');
+    $routes->get('background/delete/(:num)', 'Cms::deleteHeroBackground/$1');
+    $routes->get('background/toggle/(:num)', 'Cms::toggleHeroBackground/$1');
+    $routes->get('webAsset/(:any)', 'Cms::webAsset/$1');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');

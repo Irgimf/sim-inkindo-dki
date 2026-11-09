@@ -328,10 +328,27 @@
                 <?php endif; ?>
                 
                 <?php if(session()->get('role') === 'admin'): ?>
+                <?php
+                    $isCmsRoute = (strpos(uri_string(), 'cms') === 0);
+                    $isCmsHomepage = (strpos(uri_string(), 'cms/homepage') === 0 || strpos(uri_string(), 'cms/banner') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage);
+                ?>
                 <li>
-                    <a href="/cms" class="<?= (strpos(uri_string(), 'cms') === 0) ? 'active' : '' ?>">
-                        <i class="bi bi-newspaper me-2 text-center" style="width: 20px;"></i> <span>Admin CMS</span>
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
+                        <i class="bi bi-window-sidebar me-2 text-center" style="width: 20px;"></i> <span>Admin CMS</span>
                     </a>
+                    <ul class="treeview-menu collapse <?= $isCmsRoute ? 'show' : '' ?>" id="cmsCollapse">
+                        <li>
+                            <a href="/cms" class="<?= $isCmsBerita ? 'active' : '' ?>">
+                                <i class="bi bi-newspaper me-2"></i> Berita &amp; Informasi
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/homepage" class="<?= $isCmsHomepage ? 'active' : '' ?>">
+                                <i class="bi bi-house-gear me-2"></i> Halaman Utama
+                            </a>
+                        </li>
+                    </ul>
                 </li>
                 <li>
                     <a href="/users" class="<?= (strpos(uri_string(), 'users') === 0) ? 'active' : '' ?>">
