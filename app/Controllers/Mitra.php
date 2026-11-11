@@ -24,8 +24,8 @@ class Mitra extends BaseController
     private function syncFileToProjectWeb(string $relativePath): void
     {
         $source = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
-        $targetDir = 'D:\\magang inkindo\\ProjectWeb\\' . dirname(str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
-        $target = 'D:\\magang inkindo\\ProjectWeb\\' . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+        $targetDir = 'D:\\magang inkindo\\ProjectWeb\\public\\' . dirname(str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
+        $target = 'D:\\magang inkindo\\ProjectWeb\\public\\' . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
 
         if (is_file($source)) {
             if (!is_dir($targetDir)) {
