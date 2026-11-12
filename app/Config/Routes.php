@@ -89,6 +89,14 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->get('background/delete/(:num)', 'Cms::deleteHeroBackground/$1');
     $routes->get('background/toggle/(:num)', 'Cms::toggleHeroBackground/$1');
     $routes->get('webAsset/(:any)', 'Cms::webAsset/$1');
+    $routes->get('tentang', 'CmsTentang::index');
+    $routes->post('tentang/profile/save', 'CmsTentang::saveProfile');
+    $routes->post('tentang/unit/save', 'CmsTentang::saveUnit');
+    $routes->post('tentang/group/save', 'CmsTentang::saveGroup');
+    $routes->get('tentang/group/delete/(:num)', 'CmsTentang::deleteGroup/$1');
+    $routes->post('tentang/member/add', 'CmsTentang::addMember');
+    $routes->post('tentang/member/updateTable', 'CmsTentang::updateMembersTable');
+    $routes->get('tentang/member/delete/(:num)', 'CmsTentang::deleteMember/$1');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');

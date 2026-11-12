@@ -161,38 +161,6 @@ class Cms extends BaseController
         }
     }
 
-    private function handleBase64ImageUpload(string $base64Data, string $subFolder = 'cms_uploads'): ?string
-    {
-        if (!preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,(.+)$/i', trim($base64Data), $matches)) {
-            return null;
-        }
-
-        $ext = strtolower($matches[1]);
-        if ($ext === 'jpeg') {
-            $ext = 'jpg';
-        }
-        $binary = base64_decode($matches[2], true);
-        if ($binary === false || strlen($binary) < 64) {
-            return null;
-        }
-
-        $destDir = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $subFolder);
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0777, true);
-        }
-
-        $newName = 'banner_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-        $fullPath = $destDir . DIRECTORY_SEPARATOR . $newName;
-        if (file_put_contents($fullPath, $binary) === false) {
-            return null;
-        }
-
-        $relativePath = trim($subFolder, '/') . '/' . $newName;
-        $this->syncFileToInkindoWeb($relativePath);
-
-        return $relativePath;
-    }
-
     private function buildTargetUrlForBerita(array $row): string
     {
         $tipe = (string) ($row['tipe'] ?? 'rilis');
@@ -211,40 +179,6 @@ class Cms extends BaseController
             return 'berita.html?tab=karya&open=' . rawurlencode($slug);
         }
         return 'berita-detail.html?type=' . rawurlencode($tipe) . '&id=' . rawurlencode($slug);
-    }
-
-    private function ensureAdmin()
-    {
-        if (session()->get('role') !== 'admin') {
-            return redirect()->to('/dashboard');
-        }
-        return null;
-    }
-
-    private function handleSingleUpload(string $fieldName, array $allowedExts, string $subFolder = 'cms_uploads'): ?string
-    {
-        $file = $this->request->getFile($fieldName);
-        if (!$file || !$file->isValid() || $file->hasMoved()) {
-            return null;
-        }
-
-        $ext = strtolower($file->getExtension() ?: pathinfo($file->getClientName(), PATHINFO_EXTENSION));
-        if (!in_array($ext, $allowedExts, true)) {
-            return null;
-        }
-
-        $destDir = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $subFolder);
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0777, true);
-        }
-
-        $newName = 'cms_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-        $file->move($destDir, $newName);
-
-        $relativePath = trim($subFolder, '/') . '/' . $newName;
-        $this->syncFileToInkindoWeb($relativePath);
-
-        return $relativePath;
     }
 
     private function handleMultipleImageUploads(string $fieldName, string $subFolder = 'cms_uploads/galeri'): array

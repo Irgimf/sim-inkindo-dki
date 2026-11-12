@@ -331,7 +331,8 @@
                 <?php
                     $isCmsRoute = (strpos(uri_string(), 'cms') === 0);
                     $isCmsHomepage = (strpos(uri_string(), 'cms/homepage') === 0 || strpos(uri_string(), 'cms/banner') === 0);
-                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage);
+                    $isCmsTentang = (strpos(uri_string(), 'cms/tentang') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang);
                 ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
@@ -346,6 +347,11 @@
                         <li>
                             <a href="/cms/homepage" class="<?= $isCmsHomepage ? 'active' : '' ?>">
                                 <i class="bi bi-house-gear me-2"></i> Halaman Utama
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/tentang" class="<?= $isCmsTentang ? 'active' : '' ?>">
+                                <i class="bi bi-info-square me-2"></i> Tentang Kami
                             </a>
                         </li>
                     </ul>
