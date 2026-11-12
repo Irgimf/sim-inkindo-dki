@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sistem Manajemen Data PT INKINDO DKI</title>
+    <title>Login - SIM-INKINDO DKI (Sistem Informasi & Manajemen INKINDO DKI)</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Bootstrap Icons -->
@@ -294,7 +294,7 @@
         <div class="form-container sign-up">
             <form action="/auth/processRegister" method="post">
                 <h1 style="color: var(--inkindo-blue);">Buat Akun</h1>
-                <p>Mulai kelola data PT Anda dengan INKINDO</p>
+                <p>Daftar akun SIM-INKINDO DKI untuk mengelola data perusahaan &amp; layanan anggota.</p>
                 
                 <?php if(isset($validation)): ?>
                     <div class="alert alert-danger">
@@ -317,7 +317,7 @@
         <div class="form-container sign-in">
             <form action="/auth/processLogin" method="post">
                 <h1 style="color: var(--inkindo-blue);">Selamat Datang</h1>
-                <p>Silakan masuk ke akun Anda</p>
+                <p>Silakan masuk ke akun SIM-INKINDO DKI Anda</p>
                 
                 <?php if(session()->getFlashdata('msg')):?>
                     <div class="alert alert-danger"><?= session()->getFlashdata('msg') ?></div>
@@ -338,7 +338,7 @@
                 <!-- Left Panel (Visible when active / on Register view) -->
                 <div class="toggle-panel toggle-left">
                     <h1>Sudah Punya Akun?</h1>
-                    <p>Masukkan detail personal Anda untuk masuk ke dashboard sistem manajemen data INKINDO.</p>
+                    <p>Masukkan detail akun Anda untuk masuk ke portal SIM-INKINDO DKI (Sistem Informasi &amp; Manajemen INKINDO DKI).</p>
                     <button class="hidden" id="loginBtn">Masuk</button>
                 </div>
                 <!-- Right Panel (Visible when inactive / on Login view) -->

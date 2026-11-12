@@ -6,7 +6,7 @@
         <div class="card card-custom p-4">
             <div class="text-center mb-4">
                 <h2 class="fw-bold" style="color: var(--inkindo-blue);">Register</h2>
-                <p class="text-muted">Buat akun untuk manajemen data</p>
+                <p class="text-muted">Buat akun SIM-INKINDO DKI (Sistem Informasi &amp; Manajemen INKINDO DKI)</p>
             </div>
             
             <?php if(isset($validation)):?>

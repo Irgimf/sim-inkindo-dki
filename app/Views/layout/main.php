@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= esc($title ?? 'Dashboard INKINDO') ?></title>
+    <title><?= !empty($title) ? esc($title) . ' - SIM-INKINDO DKI' : 'SIM-INKINDO DKI - Sistem Informasi & Manajemen INKINDO DKI' ?></title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- DataTables CSS -->
@@ -369,10 +369,17 @@
         <div class="flex-grow-1 main-content-wrapper">
             <!-- Navbar Atas -->
             <nav class="navbar navbar-expand-lg bg-transparent px-4 py-4 mb-2">
-                <div class="container-fluid d-flex justify-content-between align-items-center">
-                    <span class="navbar-brand mb-0" style="font-size: 22px; font-weight: 700; color: var(--text-dark);">
-                        <?= session()->get('role') === 'mitra' ? 'Sistem Manajemen Mitra Kerja' : 'Sistem Manajemen Data PT' ?>
-                    </span>
+                <div class="container-fluid d-flex justify-content-between align-items-center gap-2">
+                    <div class="d-flex flex-column">
+                        <span class="navbar-brand mb-0 pb-0" style="font-size: 21px; font-weight: 700; color: var(--text-dark); line-height: 1.2;">
+                            SIM-INKINDO DKI
+                        </span>
+                        <small style="font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                            <?= session()->get('role') === 'mitra'
+                                ? 'Sistem Informasi &amp; Manajemen INKINDO DKI &bull; Portal Mitra Kerja'
+                                : 'Sistem Informasi &amp; Manajemen INKINDO DKI' ?>
+                        </small>
+                    </div>
                     <a href="http://localhost:8000" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
                         <i class="bi bi-globe2 me-1"></i> Lihat Web Profile
                     </a>
