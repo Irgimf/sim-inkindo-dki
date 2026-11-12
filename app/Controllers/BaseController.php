@@ -42,4 +42,37 @@ abstract class BaseController extends Controller
         // Preload any models, libraries, etc, here.
         // $this->session = service('session');
     }
+
+    /**
+     * Resolve the public asset directory of the sibling inkindo-dki-web application.
+     */
+    protected function getInkindoWebPublicPath(): string
+    {
+        return dirname(rtrim(ROOTPATH, '/\\'))
+            . DIRECTORY_SEPARATOR . 'inkindo-dki-web'
+            . DIRECTORY_SEPARATOR . 'public'
+            . DIRECTORY_SEPARATOR;
+    }
+
+    /**
+     * Copy an uploaded public asset to the sibling inkindo-dki-web/public directory.
+     */
+    protected function syncFileToInkindoWeb(string $relativePath): void
+    {
+        $normalizedRel = str_replace('/', DIRECTORY_SEPARATOR, ltrim($relativePath, '/\\'));
+        $source = FCPATH . $normalizedRel;
+        if (!is_file($source)) {
+            return;
+        }
+
+        $webPublicRoot = $this->getInkindoWebPublicPath();
+        $relDir = dirname($normalizedRel);
+        $targetDir = ($relDir === '.' || $relDir === '') ? rtrim($webPublicRoot, '/\\') : $webPublicRoot . $relDir;
+        $target = $webPublicRoot . $normalizedRel;
+
+        if (!is_dir($targetDir)) {
+            @mkdir($targetDir, 0777, true);
+        }
+        @copy($source, $target);
+    }
 }

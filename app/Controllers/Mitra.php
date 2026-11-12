@@ -21,20 +21,6 @@ class Mitra extends BaseController
         $this->mitraModel->refreshExpiredStatuses();
     }
 
-    private function syncFileToProjectWeb(string $relativePath): void
-    {
-        $source = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
-        $targetDir = 'D:\\magang inkindo\\ProjectWeb\\public\\' . dirname(str_replace('/', DIRECTORY_SEPARATOR, $relativePath));
-        $target = 'D:\\magang inkindo\\ProjectWeb\\public\\' . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
-
-        if (is_file($source)) {
-            if (!is_dir($targetDir)) {
-                @mkdir($targetDir, 0777, true);
-            }
-            @copy($source, $target);
-        }
-    }
-
     private function handleUpload(string $fieldName, string $subFolder = 'mitra_logos'): ?string
     {
         $file = $this->request->getFile($fieldName);
@@ -57,7 +43,7 @@ class Mitra extends BaseController
         $file->move($destDir, $newName);
 
         $relativePath = trim($subFolder, '/') . '/' . $newName;
-        $this->syncFileToProjectWeb($relativePath);
+        $this->syncFileToInkindoWeb($relativePath);
 
         return $relativePath;
     }
