@@ -36,14 +36,6 @@ class CmsBackground extends BaseController
 
             $defaults = [
                 [
-                    'page_key'      => 'tentang_hero',
-                    'page_name'     => 'Tentang Kami',
-                    'section_label' => 'Background Hero Banner',
-                    'image_path'    => 'assets/jakarta3.jpg',
-                    'default_path'  => 'assets/jakarta3.jpg',
-                    'updated_at'    => $now,
-                ],
-                [
                     'page_key'      => 'regulasi_hero',
                     'page_name'     => 'Regulasi',
                     'section_label' => 'Background Hero Banner',
@@ -126,6 +118,8 @@ class CmsBackground extends BaseController
             ];
 
             $db->table('cms_page_backgrounds')->insertBatch($defaults);
+        } else {
+            $db->table('cms_page_backgrounds')->where('page_key', 'tentang_hero')->delete();
         }
     }
 
