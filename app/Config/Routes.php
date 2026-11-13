@@ -67,10 +67,12 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
     $routes->post('updateProduct/(:num)', 'Mitra::updateProduct/$1');
     $routes->get('deleteProduct/(:num)', 'Mitra::deleteProduct/$1');
 
-    // Pesan Masuk Mitra Kerja
+    // Pesan Masuk Mitra Kerja & Konsultasi
     $routes->get('messages', 'Mitra::messages');
     $routes->post('markMessageRead/(:num)', 'Mitra::markMessageRead/$1');
     $routes->get('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
+    $routes->post('markKonsultasiRead/(:num)', 'Mitra::markKonsultasiRead/$1');
+    $routes->get('deleteKonsultasiMessage/(:num)', 'Mitra::deleteKonsultasiMessage/$1');
 });
 
 // Admin CMS Berita & Informasi & Halaman Utama Routes

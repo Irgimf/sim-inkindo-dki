@@ -405,7 +405,30 @@ class Mitra extends BaseController
         return redirect()->to('/mitra/products/' . $product['mitra_id']);
     }
 
-    // ================= PESAN MASUK MITRA KERJA =================
+    // ================= PESAN MASUK MITRA KERJA & KONSULTASI =================
+    private function ensureKonsultasiTable($db): void
+    {
+        if ($db->tableExists('konsultasi_messages')) {
+            return;
+        }
+
+        $db->query("
+            CREATE TABLE IF NOT EXISTS `konsultasi_messages` (
+                `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `kategori` VARCHAR(150) NOT NULL,
+                `nama` VARCHAR(150) NOT NULL,
+                `nama_perusahaan` VARCHAR(255) NOT NULL,
+                `no_telepon` VARCHAR(100) NOT NULL,
+                `email` VARCHAR(150) NOT NULL,
+                `subject` VARCHAR(255) NOT NULL,
+                `pesan` TEXT NOT NULL,
+                `is_read` TINYINT(1) NOT NULL DEFAULT 0,
+                `created_at` DATETIME NULL DEFAULT NULL,
+                PRIMARY KEY (`id`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+        ");
+    }
+
     public function messages()
     {
         $role = session()->get('role');
@@ -416,20 +439,59 @@ class Mitra extends BaseController
         }
 
         $db = \Config\Database::connect();
-        $builder = $db->table('mitra_messages m')
+        $isAdmin = ($role === 'admin');
+
+        $activeTab = $this->request->getGet('tab') === 'konsultasi' ? 'konsultasi' : 'mitra';
+        if (!$isAdmin) {
+            $activeTab = 'mitra';
+        }
+
+        // 1. Pesan Mitra Kerja (pagination maks 6 per halaman via DataTables)
+        $mitraBuilder = $db->table('mitra_messages m')
             ->select('m.*, k.nama_perusahaan as nama_mitra, k.slug as slug_mitra, k.user_id as mitra_user_id')
             ->join('mitra_kerja k', 'k.id = m.mitra_id', 'left')
             ->orderBy('m.id', 'DESC');
-
-        if ($role !== 'admin') {
-            $builder->where('k.user_id', $userId);
+        if (!$isAdmin) {
+            $mitraBuilder->where('k.user_id', $userId);
+        }
+        $messages = $mitraBuilder->get()->getResultArray();
+        $mitraTotal = count($messages);
+        $unreadMitraCount = 0;
+        foreach ($messages as $m) {
+            if ((int) ($m['is_read'] ?? 0) === 0) {
+                $unreadMitraCount++;
+            }
         }
 
-        $messages = $builder->get()->getResultArray();
+        // 2. Pesan Konsultasi (khusus Admin, pagination maks 6 per halaman via DataTables)
+        $konsultasiMessages = [];
+        $konsultasiTotal = 0;
+        $unreadKonsultasiCount = 0;
+
+        if ($isAdmin) {
+            $this->ensureKonsultasiTable($db);
+            $konsultasiMessages = $db->table('konsultasi_messages')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getResultArray();
+            $konsultasiTotal = count($konsultasiMessages);
+            foreach ($konsultasiMessages as $km) {
+                if ((int) ($km['is_read'] ?? 0) === 0) {
+                    $unreadKonsultasiCount++;
+                }
+            }
+        }
 
         return view('mitra/messages', [
-            'title'    => 'Pesan Masuk Mitra Kerja',
-            'messages' => $messages,
+            'title'                 => $isAdmin ? 'Pesan Masuk' : 'Pesan Masuk Mitra Kerja',
+            'isAdmin'               => $isAdmin,
+            'activeTab'             => $activeTab,
+            'messages'              => $messages,
+            'mitraTotal'            => $mitraTotal,
+            'unreadMitraCount'      => $unreadMitraCount,
+            'konsultasiMessages'    => $konsultasiMessages,
+            'konsultasiTotal'       => $konsultasiTotal,
+            'unreadKonsultasiCount' => $unreadKonsultasiCount,
         ]);
     }
 
@@ -442,7 +504,7 @@ class Mitra extends BaseController
                 $this->messageModel->update($msgId, ['is_read' => 1]);
             }
         }
-        return redirect()->to('/mitra/messages');
+        return redirect()->to('/mitra/messages?tab=mitra');
     }
 
     public function deleteMessage($msgId)
@@ -452,9 +514,32 @@ class Mitra extends BaseController
             $mitra = $this->mitraModel->find($msg['mitra_id']);
             if (session()->get('role') === 'admin' || ($mitra && $mitra['user_id'] == session()->get('id'))) {
                 $this->messageModel->delete($msgId);
-                session()->setFlashdata('pesan', 'Pesan berhasil dihapus.');
+                session()->setFlashdata('pesan', 'Pesan Mitra Kerja berhasil dihapus.');
             }
         }
-        return redirect()->to('/mitra/messages');
+        return redirect()->to('/mitra/messages?tab=mitra');
+    }
+
+    public function markKonsultasiRead($msgId)
+    {
+        if (session()->get('role') === 'admin') {
+            $db = \Config\Database::connect();
+            if ($db->tableExists('konsultasi_messages')) {
+                $db->table('konsultasi_messages')->where('id', (int) $msgId)->update(['is_read' => 1]);
+            }
+        }
+        return redirect()->to('/mitra/messages?tab=konsultasi');
+    }
+
+    public function deleteKonsultasiMessage($msgId)
+    {
+        if (session()->get('role') === 'admin') {
+            $db = \Config\Database::connect();
+            if ($db->tableExists('konsultasi_messages')) {
+                $db->table('konsultasi_messages')->where('id', (int) $msgId)->delete();
+                session()->setFlashdata('pesan', 'Pesan Konsultasi berhasil dihapus.');
+            }
+        }
+        return redirect()->to('/mitra/messages?tab=konsultasi');
     }
 }

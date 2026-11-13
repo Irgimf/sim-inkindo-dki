@@ -442,6 +442,9 @@
                     if (session()->get('role') === 'admin') {
                         $pendingMitraCount = (int) $dbNav->table('mitra_kerja')->where('status_kemitraan', 'pending')->countAllResults();
                         $unreadMsgCount = (int) $dbNav->table('mitra_messages')->where('is_read', 0)->countAllResults();
+                        if ($dbNav->tableExists('konsultasi_messages')) {
+                            $unreadMsgCount += (int) $dbNav->table('konsultasi_messages')->where('is_read', 0)->countAllResults();
+                        }
                     } else {
                         $unreadMsgCount = (int) $dbNav->table('mitra_messages m')
                             ->join('mitra_kerja k', 'k.id = m.mitra_id', 'inner')
