@@ -476,7 +476,8 @@
                     $isCmsHomepage = (strpos(uri_string(), 'cms/homepage') === 0 || strpos(uri_string(), 'cms/banner') === 0);
                     $isCmsTentang = (strpos(uri_string(), 'cms/tentang') === 0);
                     $isCmsRegulasi = (strpos(uri_string(), 'cms/regulasi') === 0);
-                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi);
+                    $isCmsLelang = (strpos(uri_string(), 'cms/lelang') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi && !$isCmsLelang);
                 ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
@@ -501,6 +502,11 @@
                         <li>
                             <a href="/cms/regulasi" class="<?= $isCmsRegulasi ? 'active' : '' ?>">
                                 <i class="bi bi-file-earmark-pdf me-2"></i> Regulasi
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/lelang" class="<?= $isCmsLelang ? 'active' : '' ?>">
+                                <i class="bi bi-megaphone me-2"></i> Lelang Lainnya
                             </a>
                         </li>
                     </ul>

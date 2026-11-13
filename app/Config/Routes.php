@@ -100,6 +100,10 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->get('regulasi', 'CmsRegulasi::index');
     $routes->post('regulasi/save', 'CmsRegulasi::save');
     $routes->get('regulasi/delete/(:num)', 'CmsRegulasi::delete/$1');
+    $routes->get('lelang', 'CmsLelang::index');
+    $routes->post('lelang/portal/save', 'CmsLelang::savePortal');
+    $routes->get('lelang/portal/delete/(:num)', 'CmsLelang::deletePortal/$1');
+    $routes->post('lelang/peluang/save', 'CmsLelang::savePeluang');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');
