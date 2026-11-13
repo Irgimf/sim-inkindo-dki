@@ -104,6 +104,10 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->post('lelang/portal/save', 'CmsLelang::savePortal');
     $routes->get('lelang/portal/delete/(:num)', 'CmsLelang::deletePortal/$1');
     $routes->post('lelang/peluang/save', 'CmsLelang::savePeluang');
+    $routes->get('ketentuan-mitra', 'CmsKetentuanMitra::index');
+    $routes->post('ketentuan-mitra/page/save', 'CmsKetentuanMitra::savePage');
+    $routes->post('ketentuan-mitra/item/save', 'CmsKetentuanMitra::saveItem');
+    $routes->get('ketentuan-mitra/item/delete/(:num)', 'CmsKetentuanMitra::deleteItem/$1');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');

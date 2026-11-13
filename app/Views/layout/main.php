@@ -477,7 +477,8 @@
                     $isCmsTentang = (strpos(uri_string(), 'cms/tentang') === 0);
                     $isCmsRegulasi = (strpos(uri_string(), 'cms/regulasi') === 0);
                     $isCmsLelang = (strpos(uri_string(), 'cms/lelang') === 0);
-                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi && !$isCmsLelang);
+                    $isCmsKetentuanMitra = (strpos(uri_string(), 'cms/ketentuan-mitra') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi && !$isCmsLelang && !$isCmsKetentuanMitra);
                 ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
@@ -507,6 +508,11 @@
                         <li>
                             <a href="/cms/lelang" class="<?= $isCmsLelang ? 'active' : '' ?>">
                                 <i class="bi bi-megaphone me-2"></i> Lelang Lainnya
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/ketentuan-mitra" class="<?= $isCmsKetentuanMitra ? 'active' : '' ?>">
+                                <i class="bi bi-shield-check me-2"></i> Ketentuan Mitra Kerja
                             </a>
                         </li>
                     </ul>
