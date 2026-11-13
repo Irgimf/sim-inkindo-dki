@@ -12,10 +12,10 @@
     ];
 
     $resolveImgUrl = function (?string $path): string {
-        if (!$path) return 'http://localhost:8000/assets/gambar.png';
+        if (!$path) return '/cms/webAsset/assets/gambar.png';
         if (strpos($path, 'http://') === 0 || strpos($path, 'https://') === 0) return $path;
         if (strpos($path, 'cms_uploads/') === 0) return '/' . ltrim($path, '/');
-        return 'http://localhost:8000/' . ltrim($path, '/');
+        return '/cms/webAsset/' . ltrim($path, '/');
     };
 ?>
 
@@ -28,7 +28,7 @@
         <a href="/cms/homepage" class="btn btn-outline-secondary rounded-pill px-3 fw-semibold">
             <i class="bi bi-house-gear me-1"></i> Pengaturan Halaman Utama
         </a>
-        <a href="http://localhost:8000/berita.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/berita.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
             <i class="bi bi-box-arrow-up-right me-1"></i> Lihat Halaman Berita
         </a>
         <a href="/cms/create<?= $filterTipe ? '?tipe=' . esc($filterTipe) : '' ?>" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm" style="background-color: var(--inkindo-blue); border: none;">

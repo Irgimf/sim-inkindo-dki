@@ -19,6 +19,67 @@ class App extends BaseConfig
     public string $baseURL = 'http://localhost:8080/';
 
     /**
+     * URL of the companion inkindo-dki-web profile site.
+     * Can be overridden in .env via `app.webProfileURL`.
+     */
+    public string $webProfileURL = 'http://localhost:8000';
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->applyDynamicBaseURL();
+    }
+
+    /**
+     * Automatically adapt baseURL to the incoming host and protocol when using
+     * default localhost or temporary Quick Tunnel settings.
+     */
+    protected function applyDynamicBaseURL(): void
+    {
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        $configuredHost = strtolower((string) parse_url($this->baseURL, PHP_URL_HOST));
+        $isManagedDefault = in_array($configuredHost, ['', 'localhost', '127.0.0.1'], true)
+            || str_ends_with($configuredHost, '.trycloudflare.com');
+
+        if (! $isManagedDefault) {
+            return;
+        }
+
+        $forwardedHost = (string) ($_SERVER['HTTP_X_FORWARDED_HOST'] ?? '');
+        $rawHost       = $forwardedHost !== ''
+            ? trim(explode(',', $forwardedHost)[0])
+            : trim((string) ($_SERVER['HTTP_HOST'] ?? ''));
+
+        if ($rawHost === '' || ! preg_match('/^(?:[a-zA-Z0-9.-]+|\[[a-fA-F0-9:]+\])(?::\d{1,5})?$/', $rawHost)) {
+            return;
+        }
+
+        $hostOnly   = strtolower((string) preg_replace('/:\d+$/', '', $rawHost));
+        $isTunnel   = str_ends_with($hostOnly, '.trycloudflare.com')
+            || str_ends_with($hostOnly, '.ngrok-free.app')
+            || str_ends_with($hostOnly, '.ngrok.io');
+        $isLoopback = in_array($hostOnly, ['localhost', '127.0.0.1', '[::1]'], true);
+        $isDev      = defined('ENVIRONMENT') && ENVIRONMENT === 'development';
+
+        if (! $isDev && ! $isTunnel && ! $isLoopback) {
+            return;
+        }
+
+        $forwardedProto = strtolower(trim(explode(',', (string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''))[0]));
+        $cfVisitor      = (string) ($_SERVER['HTTP_CF_VISITOR'] ?? '');
+        $isHttps        = ($forwardedProto === 'https')
+            || str_contains($cfVisitor, '"https"')
+            || (! empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+            || ((string) ($_SERVER['SERVER_PORT'] ?? '') === '443');
+
+        $this->baseURL = ($isHttps ? 'https' : 'http') . '://' . $rawHost . '/';
+    }
+
+    /**
      * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
      * If you want to accept multiple Hostnames, set this.
      *

@@ -25,6 +25,7 @@
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-app);
             color: var(--text-dark);
+            overflow-x: hidden;
         }
         .main-content-wrapper {
             background-color: var(--white);
@@ -34,6 +35,7 @@
             display: flex;
             flex-direction: column;
             overflow: hidden;
+            min-width: 0;
             min-height: calc(100vh - 30px);
         }
         .navbar-custom {
@@ -187,6 +189,7 @@
             vertical-align: middle;
             font-size: 14px;
             color: var(--text-dark);
+            background-color: transparent !important;
             transition: all 0.3s ease;
         }
         .table-custom tbody tr td:first-child {
@@ -197,16 +200,21 @@
             border-radius: 0 12px 12px 0;
         }
         .table-custom tbody tr:hover {
-            background-color: var(--inkindo-blue);
+            background-color: var(--inkindo-blue) !important;
             transform: translateY(-2px);
             box-shadow: 0 8px 15px rgba(10, 100, 164, 0.25);
         }
-        .table-custom tbody tr:hover td {
+        .table-custom tbody tr:hover td,
+        .table-custom tbody tr:hover td .text-dark,
+        .table-custom tbody tr:hover td .text-muted,
+        .table-custom tbody tr:hover td .text-secondary,
+        .table-custom tbody tr:hover td .text-warning-emphasis {
             color: var(--white) !important;
         }
         .table-custom tbody tr:hover td .badge {
             background-color: rgba(255,255,255,0.2) !important;
             color: var(--white) !important;
+            border-color: rgba(255,255,255,0.35) !important;
         }
         .table-custom tbody tr:hover td .btn {
             background-color: var(--white) !important;
@@ -235,16 +243,151 @@
             transform: translateY(-1px);
             box-shadow: 0 6px 14px rgba(10, 100, 164, 0.3);
         }
+
+        /* Mobile Drawer & Responsive Enhancements */
+        .sidebar-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(2px);
+            z-index: 1050;
+            display: none;
+        }
+        .sidebar-backdrop.show {
+            display: block;
+        }
+        .sidebar-toggle-btn {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dark);
+        }
+        .sidebar-close-btn {
+            width: 34px;
+            height: 34px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        @media (max-width: 991.98px) {
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                flex: none;
+                width: 270px;
+                max-width: 82vw;
+                height: 100vh;
+                min-height: 100vh;
+                overflow-y: auto;
+                background-color: var(--bg-app);
+                z-index: 1055;
+                transform: translateX(-105%);
+                transition: transform 0.28s ease, box-shadow 0.28s ease;
+                padding: 12px 8px 28px;
+            }
+            .sidebar.is-open {
+                transform: translateX(0);
+                box-shadow: 0 12px 32px rgba(15, 23, 42, 0.22);
+            }
+            .sidebar-header {
+                padding: 18px 20px 10px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 12px;
+            }
+            .main-content-wrapper {
+                width: 100%;
+                min-width: 0;
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+                box-shadow: none;
+            }
+            .top-app-navbar {
+                border-bottom: 1px solid #f1f5f9;
+            }
+            .table-custom-wrap .table-responsive,
+            .table-responsive {
+                overflow-x: auto !important;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 6px;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .top-app-navbar .navbar-brand {
+                font-size: 17px !important;
+            }
+            .top-app-navbar small {
+                font-size: 11px !important;
+            }
+            .table-custom {
+                border-spacing: 0 8px;
+            }
+            .table-custom thead th {
+                font-size: 11px;
+                padding: 8px 12px;
+                white-space: nowrap;
+            }
+            .table-custom tbody tr td {
+                padding: 12px;
+                font-size: 13px;
+            }
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter {
+                text-align: left !important;
+                margin-bottom: 10px;
+            }
+            .dataTables_wrapper .dataTables_filter label {
+                width: 100%;
+                display: block;
+            }
+            .dataTables_wrapper .dataTables_filter input {
+                width: 100% !important;
+                max-width: 100%;
+                margin-left: 0 !important;
+                margin-top: 6px;
+                display: block;
+            }
+            .dataTables_wrapper .dataTables_info {
+                text-align: center !important;
+                margin-bottom: 10px;
+                font-size: 12.5px;
+            }
+            .dataTables_wrapper .dataTables_paginate .pagination {
+                justify-content: center !important;
+                flex-wrap: wrap;
+                gap: 4px;
+            }
+            .row > [class*="col-md-"].border-start {
+                border-left: 0 !important;
+                border-top: 1px solid #e2e8f0;
+                padding-top: 14px;
+                margin-top: 14px;
+            }
+            .row > [class*="col-md-"] > .ms-2 {
+                margin-left: 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
 
     <?php if(session()->get('logged_in')): ?>
     <div class="d-flex" style="min-height: 100vh;">
+        <div class="sidebar-backdrop d-lg-none" id="mobileSidebarBackdrop"></div>
+
         <!-- Sidebar -->
-        <div class="sidebar d-flex flex-column">
+        <div class="sidebar d-flex flex-column" id="appSidebar">
             <div class="sidebar-header">
                 <img src="/logo-inkindo.png" alt="INKINDO DKI" style="max-width: 65%; height: auto;">
+                <button type="button" class="btn btn-sm btn-light border rounded-circle d-lg-none sidebar-close-btn flex-shrink-0" id="mobileSidebarClose" aria-label="Tutup Menu">
+                    <i class="bi bi-x-lg"></i>
+                </button>
             </div>
             
             <div class="user-panel">
@@ -332,7 +475,8 @@
                     $isCmsRoute = (strpos(uri_string(), 'cms') === 0);
                     $isCmsHomepage = (strpos(uri_string(), 'cms/homepage') === 0 || strpos(uri_string(), 'cms/banner') === 0);
                     $isCmsTentang = (strpos(uri_string(), 'cms/tentang') === 0);
-                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang);
+                    $isCmsRegulasi = (strpos(uri_string(), 'cms/regulasi') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi);
                 ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
@@ -352,6 +496,11 @@
                         <li>
                             <a href="/cms/tentang" class="<?= $isCmsTentang ? 'active' : '' ?>">
                                 <i class="bi bi-info-square me-2"></i> Tentang Kami
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/regulasi" class="<?= $isCmsRegulasi ? 'active' : '' ?>">
+                                <i class="bi bi-file-earmark-pdf me-2"></i> Regulasi
                             </a>
                         </li>
                     </ul>
@@ -374,31 +523,36 @@
         <!-- Main Content -->
         <div class="flex-grow-1 main-content-wrapper">
             <!-- Navbar Atas -->
-            <nav class="navbar navbar-expand-lg bg-transparent px-4 py-4 mb-2">
-                <div class="container-fluid d-flex justify-content-between align-items-center gap-2">
-                    <div class="d-flex flex-column">
-                        <span class="navbar-brand mb-0 pb-0" style="font-size: 21px; font-weight: 700; color: var(--text-dark); line-height: 1.2;">
-                            SIM-INKINDO DKI
-                        </span>
-                        <small style="font-size: 12px; color: var(--text-muted); font-weight: 500;">
-                            <?= session()->get('role') === 'mitra'
-                                ? 'Sistem Informasi &amp; Manajemen INKINDO DKI &bull; Portal Mitra Kerja'
-                                : 'Sistem Informasi &amp; Manajemen INKINDO DKI' ?>
-                        </small>
+            <nav class="navbar navbar-expand-lg bg-transparent px-3 px-md-4 py-3 py-md-4 mb-2 top-app-navbar">
+                <div class="container-fluid d-flex justify-content-between align-items-center gap-2 flex-nowrap">
+                    <div class="d-flex align-items-center gap-2 gap-sm-3 min-w-0">
+                        <button type="button" class="btn btn-light border rounded-3 d-lg-none flex-shrink-0 sidebar-toggle-btn" id="mobileSidebarToggle" aria-label="Buka Menu" aria-controls="appSidebar" aria-expanded="false">
+                            <i class="bi bi-list fs-4 lh-1"></i>
+                        </button>
+                        <div class="d-flex flex-column min-w-0">
+                            <span class="navbar-brand mb-0 pb-0" style="font-size: 21px; font-weight: 700; color: var(--text-dark); line-height: 1.2;">
+                                SIM-INKINDO DKI
+                            </span>
+                            <small class="text-truncate" style="font-size: 12px; color: var(--text-muted); font-weight: 500;">
+                                <?= session()->get('role') === 'mitra'
+                                    ? 'Sistem Informasi &amp; Manajemen INKINDO DKI &bull; Portal Mitra Kerja'
+                                    : 'Sistem Informasi &amp; Manajemen INKINDO DKI' ?>
+                            </small>
+                        </div>
                     </div>
-                    <a href="http://localhost:8000" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
-                        <i class="bi bi-globe2 me-1"></i> Lihat Web Profile
+                    <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3 fw-semibold flex-shrink-0">
+                        <i class="bi bi-globe2 me-sm-1"></i> <span class="d-none d-sm-inline">Lihat Web Profile</span><span class="d-inline d-sm-none">Web</span>
                     </a>
                 </div>
             </nav>
 
-            <div class="container-fluid px-5 pb-5">
+            <div class="container-fluid px-3 px-sm-4 px-lg-5 pb-4 pb-lg-5">
                 <?= $this->renderSection('content') ?>
             </div>
         </div>
     </div>
     <?php else: ?>
-        <div class="container mt-5">
+        <div class="container py-3 py-md-5">
             <?= $this->renderSection('content') ?>
         </div>
     <?php endif; ?>
@@ -482,6 +636,56 @@
                     }
                 },
                 "ordering": false // Menonaktifkan sorting bawaan
+            });
+
+            var sidebar = document.getElementById('appSidebar');
+            var backdrop = document.getElementById('mobileSidebarBackdrop');
+            var toggleBtn = document.getElementById('mobileSidebarToggle');
+            var closeBtn = document.getElementById('mobileSidebarClose');
+
+            function setSidebarOpen(open) {
+                if (!sidebar || !backdrop) return;
+                sidebar.classList.toggle('is-open', open);
+                backdrop.classList.toggle('show', open);
+                if (toggleBtn) {
+                    toggleBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                }
+                document.body.style.overflow = open && window.innerWidth < 992 ? 'hidden' : '';
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function () {
+                    setSidebarOpen(!sidebar.classList.contains('is-open'));
+                });
+            }
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function () {
+                    setSidebarOpen(false);
+                });
+            }
+            if (backdrop) {
+                backdrop.addEventListener('click', function () {
+                    setSidebarOpen(false);
+                });
+            }
+            if (sidebar) {
+                sidebar.querySelectorAll('a[href]').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        if (window.innerWidth < 992 && !link.hasAttribute('data-bs-toggle') && link.getAttribute('href') !== '#') {
+                            setSidebarOpen(false);
+                        }
+                    });
+                });
+            }
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape' && sidebar && sidebar.classList.contains('is-open')) {
+                    setSidebarOpen(false);
+                }
+            });
+            window.addEventListener('resize', function () {
+                if (window.innerWidth >= 992 && sidebar && sidebar.classList.contains('is-open')) {
+                    setSidebarOpen(false);
+                }
             });
         });
     </script>

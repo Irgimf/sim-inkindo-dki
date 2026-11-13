@@ -177,10 +177,10 @@
         </p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="http://localhost:8000/tentang.html" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/tentang.html" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3 fw-semibold">
             <i class="bi bi-box-arrow-up-right me-1"></i> Pratinjau Tentang Kami
         </a>
-        <a href="http://localhost:8000/tentang.html?tab=struktur&sub=<?= esc($activeUnit); ?>" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/tentang.html?tab=struktur&sub=<?= esc($activeUnit); ?>" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-3 fw-semibold">
             <i class="bi bi-diagram-3 me-1"></i> Pratinjau <?= esc($currentUnitObj['nama'] ?? 'Struktur'); ?>
         </a>
     </div>

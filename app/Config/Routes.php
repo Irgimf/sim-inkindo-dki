@@ -97,6 +97,9 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->post('tentang/member/add', 'CmsTentang::addMember');
     $routes->post('tentang/member/updateTable', 'CmsTentang::updateMembersTable');
     $routes->get('tentang/member/delete/(:num)', 'CmsTentang::deleteMember/$1');
+    $routes->get('regulasi', 'CmsRegulasi::index');
+    $routes->post('regulasi/save', 'CmsRegulasi::save');
+    $routes->get('regulasi/delete/(:num)', 'CmsRegulasi::delete/$1');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');

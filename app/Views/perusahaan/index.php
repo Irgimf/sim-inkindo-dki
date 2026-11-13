@@ -1,8 +1,8 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
-<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-    <h3 class="fw-bold" style="color: var(--inkindo-blue);"><?= $title; ?></h3>
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 mt-2">
+    <h3 class="fw-bold mb-0" style="color: var(--inkindo-blue);"><?= $title; ?></h3>
     <?php if(session()->get('role') === 'admin' || empty($companies)): ?>
         <a href="/perusahaan/create" class="btn px-4 py-2 rounded-pill fw-bold" style="background-color: var(--inkindo-blue); color: white; box-shadow: 0 4px 10px rgba(10,100,164,0.2); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-2px)';" onmouseout="this.style.transform='translateY(0)';"><i class="bi bi-plus-lg me-1"></i> Tambah Data PT</a>
     <?php endif; ?>

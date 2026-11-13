@@ -1,7 +1,7 @@
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('content') ?>
-<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4 mt-2">
     <div>
         <h3 class="fw-bold mb-1" style="color: var(--inkindo-blue);"><?= esc($title); ?></h3>
         <p class="text-muted small mb-0">Kelola logo, pengajuan tanggal berakhir kemitraan, profil perusahaan, dan katalog produk Mitra Kerja INKINDO DKI Jakarta.</p>

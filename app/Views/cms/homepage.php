@@ -139,7 +139,7 @@
         <p class="text-muted small mb-0">Kelola <strong>Teks Bergerak</strong>, <strong>Banner Utama (Hero Carousel)</strong>, <strong>Gambar Background Utama</strong>, <strong>3 Berita Pilihan</strong>, serta <strong>8 Publikasi Beranda (Grid 4×2)</strong> di WebProfile (`index.html`).</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
-        <a href="http://localhost:8000/index.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/index.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">
             <i class="bi bi-box-arrow-up-right me-1"></i> Pratinjau Halaman Utama
         </a>
     </div>
@@ -178,7 +178,7 @@
 
         <!-- Pratinjau Live Simulasi Animasi Mengetik -->
         <div class="p-3 rounded-3 mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2" style="background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);">
-            <div style="border-bottom: 1.5px solid rgba(255,255,255,0.65); padding-bottom: 6px; min-width: 280px; flex: 1;">
+            <div style="border-bottom: 1.5px solid rgba(255,255,255,0.65); padding-bottom: 6px; min-width: 0; width: 100%; flex: 1;">
                 <span class="badge bg-white bg-opacity-10 text-white-50 mb-1" style="font-size: 10px;">PRATINJAU EFEK MENGETIK DI ATAS BANNER</span>
                 <div class="text-white fw-bold" style="font-size: 22px; letter-spacing: -0.3px; text-shadow: 0 2px 8px rgba(0,0,0,0.5);">
                     <span id="cms_live_typing_preview">Selamat Datang</span><span class="text-info ms-1" style="animation: cmsBlink 0.9s infinite;">|</span>

@@ -6,8 +6,8 @@
         <a href="/mitra" class="btn btn-outline-secondary btn-sm mb-3"><i class="bi bi-arrow-left"></i> Kembali ke Data Mitra Kerja</a>
         <h3 class="fw-bold mb-0" style="color: var(--inkindo-blue);">Detail Mitra & Katalog Produk</h3>
     </div>
-    <div class="d-flex gap-2">
-        <a href="http://localhost:8000/mitra-kerja/<?= esc($mitra['slug']); ?>" target="_blank" class="btn btn-outline-primary btn-sm px-3 py-2 rounded-pill fw-semibold">
+    <div class="d-flex flex-wrap gap-2">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/mitra-kerja/<?= esc($mitra['slug']); ?>" target="_blank" class="btn btn-outline-primary btn-sm px-3 py-2 rounded-pill fw-semibold">
             <i class="bi bi-box-arrow-up-right me-1"></i> Lihat Halaman Profil Mitra di Web
         </a>
         <a href="/mitra/edit/<?= $mitra['id']; ?>" class="btn btn-sm btn-secondary px-3 py-2 rounded-pill fw-semibold">

@@ -275,6 +275,117 @@
             margin: 0;
             padding: 0;
         }
+
+        .mobile-auth-switch {
+            display: none;
+        }
+
+        .auth-wrapper button.mobile-switch-btn {
+            background: transparent;
+            color: var(--inkindo-blue);
+            border: none;
+            box-shadow: none;
+            padding: 4px 8px;
+            margin-top: 0;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+            border-radius: 8px;
+        }
+
+        .auth-wrapper button.mobile-switch-btn:hover {
+            background: rgba(10, 100, 164, 0.08);
+            transform: none;
+        }
+
+        .auth-bottom-links {
+            margin-top: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 20px;
+            align-items: center;
+            font-size: 13.5px;
+            text-align: center;
+            padding: 0 12px;
+        }
+
+        @media (max-width: 767.98px) {
+            body {
+                height: auto;
+                min-height: 100vh;
+                padding: 24px 14px;
+            }
+            .auth-wrapper {
+                width: 100%;
+                max-width: 430px;
+                min-height: auto;
+                border-radius: 22px;
+            }
+            .auth-wrapper form {
+                padding: 32px 22px;
+                height: auto;
+            }
+            .auth-wrapper h1 {
+                font-size: 24px !important;
+            }
+            .auth-wrapper p {
+                margin: 10px 0 14px;
+                font-size: 13.5px;
+            }
+            .auth-wrapper .form-container {
+                position: relative;
+                top: auto;
+                left: auto;
+                width: 100%;
+                height: auto;
+                transform: none !important;
+                animation: none !important;
+                transition: none;
+            }
+            .auth-wrapper .sign-in {
+                display: block;
+                opacity: 1;
+            }
+            .auth-wrapper .sign-up {
+                display: none;
+                opacity: 1;
+            }
+            .auth-wrapper.active .sign-in {
+                display: none;
+            }
+            .auth-wrapper.active .sign-up {
+                display: block;
+                opacity: 1;
+            }
+            .toggle-container {
+                display: none;
+            }
+            .mobile-auth-switch {
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                margin-top: 18px;
+                padding-top: 14px;
+                border-top: 1px solid #e2e8f0;
+                width: 100%;
+                font-size: 13px;
+                color: #64748b;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .auth-bottom-links {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .auth-link-sep {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -301,6 +412,10 @@
                 <input type="password" name="password" placeholder="Buat Password (min. 6 karakter)" required>
                 <input type="password" name="confpassword" placeholder="Konfirmasi Password" required>
                 <button type="submit">Daftar Mitra</button>
+                <div class="mobile-auth-switch">
+                    <span>Sudah terdaftar mitra?</span>
+                    <button type="button" class="mobile-switch-btn" id="mobileLoginBtn">Masuk Mitra</button>
+                </div>
             </form>
         </div>
 
@@ -321,6 +436,10 @@
                 <input type="text" name="username" placeholder="Username Mitra / Admin" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <button type="submit">Login</button>
+                <div class="mobile-auth-switch">
+                    <span>Belum daftar mitra?</span>
+                    <button type="button" class="mobile-switch-btn" id="mobileRegisterBtn">Daftar Mitra</button>
+                </div>
             </form>
         </div>
 
@@ -343,11 +462,11 @@
         </div>
     </div>
 
-    <div style="margin-top: 18px; display: flex; gap: 20px; align-items: center; font-size: 13.5px;">
-        <a href="http://localhost:8000" style="color: #64748b; text-decoration: none; font-weight: 500;">
+    <div class="auth-bottom-links">
+        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>" style="color: #64748b; text-decoration: none; font-weight: 500;">
             <i class="bi bi-arrow-left"></i> Kembali ke Web Profile INKINDO
         </a>
-        <span style="color: #cbd5e1;">|</span>
+        <span class="auth-link-sep" style="color: #cbd5e1;">|</span>
         <a href="/auth/login" style="color: var(--inkindo-blue); text-decoration: none; font-weight: 600;">
             Portal Login Anggota (PT) <i class="bi bi-arrow-right"></i>
         </a>
@@ -357,16 +476,23 @@
         const authWrapper = document.getElementById('authWrapper');
         const registerBtn = document.getElementById('registerBtn');
         const loginBtn = document.getElementById('loginBtn');
+        const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
+        const mobileLoginBtn = document.getElementById('mobileLoginBtn');
 
-        registerBtn.addEventListener('click', () => {
+        function showRegister() {
             authWrapper.classList.add("active");
             window.history.pushState({}, '', '/mitra/register');
-        });
+        }
 
-        loginBtn.addEventListener('click', () => {
+        function showLogin() {
             authWrapper.classList.remove("active");
             window.history.pushState({}, '', '/mitra/login');
-        });
+        }
+
+        if (registerBtn) registerBtn.addEventListener('click', showRegister);
+        if (mobileRegisterBtn) mobileRegisterBtn.addEventListener('click', showRegister);
+        if (loginBtn) loginBtn.addEventListener('click', showLogin);
+        if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', showLogin);
     </script>
 </body>
 </html>
