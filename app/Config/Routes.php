@@ -108,6 +108,9 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->post('ketentuan-mitra/page/save', 'CmsKetentuanMitra::savePage');
     $routes->post('ketentuan-mitra/item/save', 'CmsKetentuanMitra::saveItem');
     $routes->get('ketentuan-mitra/item/delete/(:num)', 'CmsKetentuanMitra::deleteItem/$1');
+    $routes->get('backgrounds', 'CmsBackground::index');
+    $routes->post('backgrounds/save', 'CmsBackground::save');
+    $routes->get('backgrounds/reset/(:num)', 'CmsBackground::reset/$1');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');
