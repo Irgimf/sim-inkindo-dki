@@ -479,7 +479,8 @@
                     $isCmsLelang = (strpos(uri_string(), 'cms/lelang') === 0);
                     $isCmsKetentuanMitra = (strpos(uri_string(), 'cms/ketentuan-mitra') === 0);
                     $isCmsBackgrounds = (strpos(uri_string(), 'cms/backgrounds') === 0);
-                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi && !$isCmsLelang && !$isCmsKetentuanMitra && !$isCmsBackgrounds);
+                    $isCmsFooterContact = (strpos(uri_string(), 'cms/footer-contact') === 0);
+                    $isCmsBerita = ($isCmsRoute && !$isCmsHomepage && !$isCmsTentang && !$isCmsRegulasi && !$isCmsLelang && !$isCmsKetentuanMitra && !$isCmsBackgrounds && !$isCmsFooterContact);
                 ?>
                 <li>
                     <a href="#" class="dropdown-toggle" data-bs-toggle="collapse" data-bs-target="#cmsCollapse" aria-expanded="<?= $isCmsRoute ? 'true' : 'false' ?>">
@@ -519,6 +520,11 @@
                         <li>
                             <a href="/cms/backgrounds" class="<?= $isCmsBackgrounds ? 'active' : '' ?>">
                                 <i class="bi bi-images me-2"></i> Background &amp; Gambar
+                            </a>
+                        </li>
+                        <li>
+                            <a href="/cms/footer-contact" class="<?= $isCmsFooterContact ? 'active' : '' ?>">
+                                <i class="bi bi-telephone-inbound me-2"></i> Footer &amp; Contact
                             </a>
                         </li>
                     </ul>

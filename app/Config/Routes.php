@@ -111,6 +111,8 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
     $routes->get('backgrounds', 'CmsBackground::index');
     $routes->post('backgrounds/save', 'CmsBackground::save');
     $routes->get('backgrounds/reset/(:num)', 'CmsBackground::reset/$1');
+    $routes->get('footer-contact', 'CmsFooterContact::index');
+    $routes->post('footer-contact/save', 'CmsFooterContact::save');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');
