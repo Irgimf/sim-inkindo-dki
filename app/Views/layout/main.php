@@ -534,7 +534,15 @@
                 </li>
                 <li>
                     <a href="/users" class="<?= (strpos(uri_string(), 'users') === 0) ? 'active' : '' ?>">
-                        <i class="bi bi-people me-2 text-center" style="width: 20px;"></i> <span>Kelola Pengguna</span>
+                        <i class="bi bi-people me-2 text-center" style="width: 20px;"></i> <span>Manajemen Pengguna</span>
+                    </a>
+                </li>
+                <?php endif; ?>
+
+                <?php if(in_array(session()->get('role'), ['user', 'mitra'], true)): ?>
+                <li>
+                    <a href="/profile" class="<?= (strpos(uri_string(), 'profile') === 0) ? 'active' : '' ?>">
+                        <i class="bi bi-person-circle me-2 text-center" style="width: 20px;"></i> <span>Profile</span>
                     </a>
                 </li>
                 <?php endif; ?>

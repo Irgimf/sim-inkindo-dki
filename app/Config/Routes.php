@@ -124,9 +124,19 @@ $routes->group('cms', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('delete/(:num)', 'Cms::delete/$1');
 });
 
+// Profile Routes (Anggota & Mitra Kerja)
+$routes->group('profile', ['filter' => 'role:user,mitra'], static function ($routes) {
+    $routes->get('/', 'Profile::index');
+    $routes->post('update', 'Profile::update');
+    $routes->post('password', 'Profile::updatePassword');
+    $routes->post('delete', 'Profile::deleteAccount');
+});
+
 // Users Routes (Admin only)
 $routes->group('users', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('/', 'Users::index');
+    $routes->post('store', 'Users::store');
+    $routes->post('updateRole/(:num)', 'Users::updateRole/$1');
     $routes->get('delete/(:num)', 'Users::delete/$1');
 });
 

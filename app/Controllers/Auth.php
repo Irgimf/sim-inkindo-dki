@@ -112,7 +112,8 @@ class Auth extends BaseController
                 if (in_array($data['role'], ['admin', 'super_admin'], true)) {
                     $normalizedRole = 'admin';
                 } elseif ($data['role'] === 'mitra') {
-                    $normalizedRole = 'mitra';
+                    $session->setFlashdata('msg', 'Akun ini adalah akun Mitra Kerja. Silakan login melalui Portal Mitra Kerja.');
+                    return redirect()->to('/auth/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
                 } else {
                     $normalizedRole = 'user';
                 }
