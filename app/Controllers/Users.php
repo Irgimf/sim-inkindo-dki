@@ -109,25 +109,43 @@ class Users extends BaseController
         }
 
         $id = (int) $id;
-        if ($id === (int) session()->get('id')) {
+        $activeAdminId = (int) session()->get('id');
+        if ($id === $activeAdminId) {
             return redirect()->to('/users')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri yang sedang login.');
         }
 
-        $userCompanies = $this->companyModel->where('user_id', $id)->findAll();
-        foreach ($userCompanies as $comp) {
-            $this->companyModel->deleteCompanyAndMember((int) $comp['id']);
+        $targetUser = $this->userModel->find($id);
+        if (! $targetUser) {
+            return redirect()->to('/users')->with('error', 'Akun pengguna tidak ditemukan.');
         }
-        $this->sbuModel->where('user_id', $id)->delete();
-        $this->mitraModel->where('user_id', $id)->delete();
 
         $db = \Config\Database::connect();
+        $isTargetAdmin = in_array((string) ($targetUser['role'] ?? ''), ['admin', 'super_admin'], true);
+
+        if ($isTargetAdmin) {
+            // Alihkan kepemilikan data master organisasi ke admin yang sedang aktif
+            $this->companyModel->where('user_id', $id)->set(['user_id' => $activeAdminId])->update();
+            $this->sbuModel->where('user_id', $id)->set(['user_id' => $activeAdminId])->update();
+            $this->mitraModel->where('user_id', $id)->set(['user_id' => $activeAdminId])->update();
+        } else {
+            $userCompanies = $this->companyModel->where('user_id', $id)->findAll();
+            foreach ($userCompanies as $comp) {
+                $this->companyModel->deleteCompanyAndMember((int) $comp['id']);
+            }
+            $this->sbuModel->where('user_id', $id)->delete();
+            $this->mitraModel->where('user_id', $id)->delete();
+        }
+
         if ($db->tableExists('sso_tokens')) {
             $db->table('sso_tokens')->where('user_id', $id)->delete();
         }
 
         $this->userModel->delete($id);
 
-        session()->setFlashdata('pesan', 'Akun pengguna dan seluruh datanya berhasil dihapus.');
+        $msg = $isTargetAdmin
+            ? 'Akun admin berhasil dihapus. Seluruh data perusahaan, SBU, dan mitra yang dibuatnya telah dialihkan ke akun admin aktif.'
+            : 'Akun pengguna dan seluruh datanya berhasil dihapus.';
+        session()->setFlashdata('pesan', $msg);
         return redirect()->to('/users');
     }
 }

@@ -84,7 +84,12 @@
                         <?php if ($isSelf): ?>
                             <span class="text-muted small">-</span>
                         <?php else: ?>
-                            <a href="/users/delete/<?= $uid; ?>" class="btn btn-sm btn-danger px-3 rounded-pill fw-semibold" onclick="return confirm('Menghapus akun ini akan menghapus semua data Perusahaan, SBU, dan Mitra miliknya. Apakah Anda yakin?');">Hapus</a>
+                            <?php
+                                $confirmText = in_array($uRole, ['admin', 'super_admin'], true)
+                                    ? 'Hapus akun admin ini? Data perusahaan, SBU, dan mitra yang dibuatnya akan dialihkan ke akun admin Anda.'
+                                    : 'Menghapus akun ini akan menghapus semua data Perusahaan, SBU, dan Mitra miliknya. Apakah Anda yakin?';
+                            ?>
+                            <a href="/users/delete/<?= $uid; ?>" class="btn btn-sm btn-danger px-3 rounded-pill fw-semibold" onclick="return confirm('<?= esc($confirmText, 'js'); ?>');">Hapus</a>
                         <?php endif; ?>
                     </td>
                 </tr>

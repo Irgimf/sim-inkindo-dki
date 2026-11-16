@@ -117,23 +117,9 @@
 <!-- SECTION: FORM TAMBAH SBU (INLINE) -->
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white border-bottom-0 py-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <?php if ($isBothJkNjk): ?>
-            <div class="d-flex flex-wrap gap-2">
-                <button class="btn btn-inkindo px-3 fw-semibold" type="button" onclick="openFormSbuWithJenis('Jasa Konstruksi')">
-                    <i class="bi bi-building-gear me-1"></i> + Tambah SBU Jasa Konstruksi (JK)
-                </button>
-                <button class="btn btn-outline-primary px-3 fw-semibold" type="button" onclick="openFormSbuWithJenis('Non Jasa Konstruksi')">
-                    <i class="bi bi-briefcase me-1"></i> + Tambah SBU Non Jasa Konstruksi (NJK)
-                </button>
-            </div>
-            <span class="badge bg-info-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">
-                <i class="bi bi-layers-half me-1"></i> PT Kategori: Jasa Konstruksi (JK) &amp; Non Jasa Konstruksi (NJK)
-            </span>
-        <?php else: ?>
-            <button class="btn btn-inkindo px-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormSbu" aria-expanded="false">
-                + Tambah Data Subklasifikasi (SBU)
-            </button>
-        <?php endif; ?>
+        <button class="btn btn-inkindo px-3 fw-semibold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseFormSbu" aria-expanded="false">
+            + Tambah SBU
+        </button>
     </div>
     <div class="collapse" id="collapseFormSbu">
         <div class="card-body bg-light rounded mt-2 mx-3 mb-3 border">
@@ -148,19 +134,13 @@
                             <div class="col-md-6">
                                 <label class="w-100 p-3 rounded-3 border d-flex align-items-center gap-3 bg-white sbu-jenis-option" id="card_jenis_jk" style="cursor: pointer; border-color: var(--inkindo-blue) !important; box-shadow: 0 0 0 3px rgba(10, 100, 164, 0.12);">
                                     <input type="radio" class="form-check-input mt-0" name="jenis_sbu" id="radio_jenis_jk" value="Jasa Konstruksi" checked onchange="highlightJenisSbuCard()">
-                                    <div>
-                                        <div class="fw-bold text-dark"><i class="bi bi-building-gear text-primary me-1"></i> Jasa Konstruksi (JK)</div>
-                                        <div class="small text-muted">Subklasifikasi masuk ke daftar SBU Jasa Konstruksi (Contoh: AR001, RK001, PR101).</div>
-                                    </div>
+                                    <div class="fw-bold text-dark"><i class="bi bi-building-gear text-primary me-1"></i> Jasa Konstruksi (JK)</div>
                                 </label>
                             </div>
                             <div class="col-md-6">
                                 <label class="w-100 p-3 rounded-3 border d-flex align-items-center gap-3 bg-white sbu-jenis-option" id="card_jenis_njk" style="cursor: pointer;">
                                     <input type="radio" class="form-check-input mt-0" name="jenis_sbu" id="radio_jenis_njk" value="Non Jasa Konstruksi" onchange="highlightJenisSbuCard()">
-                                    <div>
-                                        <div class="fw-bold text-dark"><i class="bi bi-briefcase text-info me-1"></i> Non Jasa Konstruksi (NJK)</div>
-                                        <div class="small text-muted">Subklasifikasi masuk ke daftar SBU Non Jasa Konstruksi (Contoh: 70201, 70209, 1.SI).</div>
-                                    </div>
+                                    <div class="fw-bold text-dark"><i class="bi bi-briefcase text-info me-1"></i> Non Jasa Konstruksi (NJK)</div>
                                 </label>
                             </div>
                         </div>
