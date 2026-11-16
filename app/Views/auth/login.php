@@ -431,6 +431,7 @@
         <!-- Sign In Form -->
         <div class="form-container sign-in">
             <form action="/auth/processLogin" method="post">
+                <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
                 <h1 style="color: var(--inkindo-blue);">Selamat Datang</h1>
                 <p>Silakan masuk ke akun SIM-INKINDO DKI Anda</p>
                 

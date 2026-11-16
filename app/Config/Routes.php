@@ -11,6 +11,8 @@ $routes->post('/auth/processLogin', 'Auth::processLogin');
 $routes->get('/auth/register', 'Auth::register');
 $routes->post('/auth/processRegister', 'Auth::processRegister');
 $routes->get('/auth/logout', 'Auth::logout');
+$routes->get('/auth/sso', 'Auth::sso');
+$routes->get('/auth/switch-to-web', 'Auth::switchToWeb', ['filter' => 'auth']);
 
 // Auth Routes (Mitra Kerja)
 $routes->get('/mitra/login', 'Auth::mitraLogin');
@@ -19,10 +21,10 @@ $routes->get('/mitra/register', 'Auth::mitraRegister');
 $routes->post('/mitra/processRegister', 'Auth::processMitraRegister');
 
 // Dashboard Route
-$routes->get('/dashboard', 'Dashboard::index', ['filter' => 'auth']);
+$routes->get('/dashboard', 'Dashboard::index', ['filter' => 'role:admin']);
 
 // Perusahaan Routes
-$routes->group('perusahaan', ['filter' => 'auth'], static function ($routes) {
+$routes->group('perusahaan', ['filter' => 'role:admin,user'], static function ($routes) {
     $routes->get('/', 'Perusahaan::index');
     $routes->get('create', 'Perusahaan::create');
     $routes->post('store', 'Perusahaan::store');
@@ -32,7 +34,7 @@ $routes->group('perusahaan', ['filter' => 'auth'], static function ($routes) {
 });
 
 // SBU Routes
-$routes->group('sbu', ['filter' => 'auth'], static function ($routes) {
+$routes->group('sbu', ['filter' => 'role:admin,user'], static function ($routes) {
     $routes->get('/', 'Sbu::index');
     $routes->get('detail/(:num)', 'Sbu::detail/$1');
     $routes->get('create', 'Sbu::create');
@@ -49,7 +51,7 @@ $routes->group('sbu', ['filter' => 'auth'], static function ($routes) {
 });
 
 // Mitra Kerja Management Routes
-$routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
+$routes->group('mitra', ['filter' => 'role:admin,mitra'], static function ($routes) {
     $routes->get('/', 'Mitra::index');
     $routes->get('create', 'Mitra::create');
     $routes->post('store', 'Mitra::store');
@@ -57,9 +59,9 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
     $routes->post('update/(:num)', 'Mitra::update/$1');
     $routes->get('delete/(:num)', 'Mitra::delete/$1');
 
-    // Persetujuan Pengajuan Mitra Kerja (Admin)
-    $routes->post('approve/(:num)', 'Mitra::approve/$1');
-    $routes->post('reject/(:num)', 'Mitra::reject/$1');
+    // Persetujuan Pengajuan Mitra Kerja (Admin only)
+    $routes->post('approve/(:num)', 'Mitra::approve/$1', ['filter' => 'role:admin']);
+    $routes->post('reject/(:num)', 'Mitra::reject/$1', ['filter' => 'role:admin']);
 
     // Detail Produk Mitra Kerja
     $routes->get('products/(:num)', 'Mitra::products/$1');
@@ -76,7 +78,7 @@ $routes->group('mitra', ['filter' => 'auth'], static function ($routes) {
 });
 
 // Admin CMS Berita & Informasi & Halaman Utama Routes
-$routes->group('cms', ['filter' => 'auth'], static function ($routes) {
+$routes->group('cms', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('/', 'Cms::index');
     $routes->get('homepage', 'Cms::homepage');
     $routes->post('updateHomepageSlots', 'Cms::updateHomepageSlots');
@@ -123,13 +125,13 @@ $routes->group('cms', ['filter' => 'auth'], static function ($routes) {
 });
 
 // Users Routes (Admin only)
-$routes->group('users', ['filter' => 'auth'], static function ($routes) {
+$routes->group('users', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('/', 'Users::index');
     $routes->get('delete/(:num)', 'Users::delete/$1');
 });
 
 // Pencarian Routes
-$routes->group('pencarian', ['filter' => 'auth'], static function ($routes) {
+$routes->group('pencarian', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('/', 'Pencarian::index');
     $routes->get('exportExcel', 'Pencarian::exportExcel');
 });

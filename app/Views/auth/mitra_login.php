@@ -394,7 +394,6 @@
         <!-- Sign Up Form (Mitra Kerja) -->
         <div class="form-container sign-up">
             <form action="/mitra/processRegister" method="post">
-                <div class="portal-badge"><i class="bi bi-people-fill"></i> Portal Mitra Kerja</div>
                 <h1 style="color: var(--inkindo-blue); font-size: 28px;">Daftar Mitra Kerja</h1>
                 <p>Bergabung sebagai Mitra Kerja strategis INKINDO DKI Jakarta</p>
                 
@@ -422,7 +421,7 @@
         <!-- Sign In Form (Mitra Kerja) -->
         <div class="form-container sign-in">
             <form action="/mitra/processLogin" method="post">
-                <div class="portal-badge"><i class="bi bi-people-fill"></i> Portal Mitra Kerja</div>
+                <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
                 <h1 style="color: var(--inkindo-blue); font-size: 28px;">Login Mitra Kerja</h1>
                 <p>Kelola profil perusahaan, logo, dan katalog produk kemitraan Anda</p>
                 

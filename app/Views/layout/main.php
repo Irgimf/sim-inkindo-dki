@@ -716,5 +716,36 @@
             });
         });
     </script>
+    <?php if (session()->get('logged_in')): ?>
+        <div id="sim-auth-float" style="position: fixed; left: 28px; bottom: 28px; z-index: 1060; background: rgba(255, 255, 255, 0.78); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.75); border-radius: 999px; box-shadow: 0 12px 34px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.92); padding: 7px 9px 7px 16px; font-size: 13.5px; color: #0f172a; display: inline-flex; align-items: center; gap: 10px; max-width: calc(100vw - 56px); transition: all 0.25s ease;">
+            <button type="button" id="sim-auth-float-toggle" title="Klik untuk opsi akun" style="border: none; background: transparent; padding: 0; margin: 0; display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-family: inherit; color: inherit; min-width: 0;">
+                <span style="width: 11px; height: 11px; border-radius: 50%; background: #34c759; flex-shrink: 0; box-shadow: 0 0 0 4px rgba(52, 199, 89, 0.24);"></span>
+                <span style="font-weight: 700; font-size: 14px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 210px; color: #0f172a;"><?= esc((string) session()->get('username')); ?></span>
+                <i id="sim-auth-float-chevron" class="bi bi-chevron-right" style="font-size: 14px; color: #64748b; transition: transform 0.2s ease;"></i>
+            </button>
+            <div id="sim-auth-float-body" style="display: none; align-items: center; gap: 8px; padding-left: 10px; border-left: 1px solid rgba(15, 23, 42, 0.1); flex-shrink: 0;">
+                <a href="/auth/switch-to-web" title="Pindah ke Web INKINDO" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(10, 100, 164, 0.94); color: #ffffff; text-decoration: none; padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 12.5px; white-space: nowrap; box-shadow: 0 4px 12px rgba(10, 100, 164, 0.24);">
+                    <i class="bi bi-arrow-left-right"></i> Web INKINDO
+                </a>
+                <a href="/auth/logout" title="Logout" aria-label="Logout" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(254, 226, 226, 0.88); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.24); text-decoration: none; border-radius: 50%; flex-shrink: 0;">
+                    <i class="bi bi-box-arrow-right" style="font-size: 16px;"></i>
+                </a>
+            </div>
+        </div>
+        <script>
+            (function () {
+                var btn = document.getElementById('sim-auth-float-toggle');
+                var body = document.getElementById('sim-auth-float-body');
+                var chevron = document.getElementById('sim-auth-float-chevron');
+                if (btn && body) {
+                    btn.addEventListener('click', function () {
+                        var isClosed = body.style.display === 'none';
+                        body.style.display = isClosed ? 'inline-flex' : 'none';
+                        if (chevron) chevron.style.transform = isClosed ? 'rotate(180deg)' : 'rotate(0deg)';
+                    });
+                }
+            })();
+        </script>
+    <?php endif; ?>
 </body>
 </html>
