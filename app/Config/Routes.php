@@ -11,6 +11,7 @@ $routes->post('/auth/processLogin', 'Auth::processLogin');
 $routes->get('/auth/register', 'Auth::register');
 $routes->post('/auth/processRegister', 'Auth::processRegister');
 $routes->get('/auth/logout', 'Auth::logout');
+$routes->get('/auth/captcha', 'Auth::captcha');
 $routes->get('/auth/sso', 'Auth::sso');
 $routes->get('/auth/switch-to-web', 'Auth::switchToWeb', ['filter' => 'auth']);
 

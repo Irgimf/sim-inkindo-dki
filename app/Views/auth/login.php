@@ -40,7 +40,68 @@
             overflow: hidden;
             width: 850px;
             max-width: 95%;
-            min-height: 560px;
+            min-height: 640px;
+        }
+
+        .auth-captcha-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .auth-captcha-box {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 2px 6px 2px 2px;
+            flex-shrink: 0;
+        }
+
+        .auth-captcha-box img {
+            height: 40px;
+            width: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .auth-captcha-refresh {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            color: var(--inkindo-blue) !important;
+            padding: 4px 6px !important;
+            margin: 0 !important;
+            font-size: 15px !important;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .auth-captcha-refresh:hover {
+            background: rgba(10, 100, 164, 0.08) !important;
+            transform: none !important;
+        }
+
+        .auth-captcha-input {
+            margin: 0 !important;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .auth-hp-field {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
         }
 
         .auth-brand-logo {
@@ -585,6 +646,9 @@
                 <h1 style="color: var(--inkindo-blue);">Buat Akun</h1>
                 <p>Daftar akun SIM-INKINDO DKI untuk mengelola data perusahaan &amp; layanan anggota.</p>
                 
+                <?php if(isset($registerError)): ?>
+                    <div class="alert alert-danger"><?= esc($registerError) ?></div>
+                <?php endif; ?>
                 <?php if(isset($validation)): ?>
                     <div class="alert alert-danger">
                         <ul class="list-unstyled">
@@ -595,9 +659,19 @@
                     </div>
                 <?php endif; ?>
 
+                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
                 <input type="text" name="username" placeholder="Buat Username" required value="<?= set_value('username') ?>">
                 <input type="password" name="password" placeholder="Buat Password" required>
                 <input type="password" name="confpassword" placeholder="Konfirmasi Password" required>
+                <div class="auth-captcha-row">
+                    <div class="auth-captcha-box">
+                        <img src="/auth/captcha?form=register&v=<?= time() ?>" id="captchaImgRegister" alt="CAPTCHA">
+                        <button type="button" class="auth-captcha-refresh" onclick="refreshCaptcha('captchaImgRegister', 'register')" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <input type="text" name="captcha" class="auth-captcha-input" placeholder="Kode" maxlength="5" autocomplete="off" required>
+                </div>
                 <button type="submit">Daftar</button>
                 <div class="mobile-auth-switch">
                     <span>Sudah punya akun?</span>
@@ -621,6 +695,7 @@
                     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                 <?php endif;?>
 
+                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
                 <div class="auth-input-group">
                     <i class="bi bi-person auth-input-icon"></i>
                     <input type="text" name="username" placeholder="Username atau Email" required>
@@ -631,6 +706,15 @@
                     <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('loginPasswordInput', this)" aria-label="Tampilkan password">
                         <i class="bi bi-eye-slash"></i>
                     </button>
+                </div>
+                <div class="auth-captcha-row">
+                    <div class="auth-captcha-box">
+                        <img src="/auth/captcha?form=login&v=<?= time() ?>" id="captchaImgLogin" alt="CAPTCHA">
+                        <button type="button" class="auth-captcha-refresh" onclick="refreshCaptcha('captchaImgLogin', 'login')" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <input type="text" name="captcha" class="auth-captcha-input" placeholder="Kode" maxlength="5" autocomplete="off" required>
                 </div>
                 <div class="auth-options-row">
                     <label class="auth-remember-label">
@@ -676,6 +760,12 @@
     </div>
 
     <script>
+        function refreshCaptcha(imgId, formKey) {
+            const img = document.getElementById(imgId);
+            if (img) {
+                img.src = '/auth/captcha?form=' + encodeURIComponent(formKey) + '&t=' + Date.now();
+            }
+        }
         function togglePasswordVisibility(inputId, btn) {
             const inp = document.getElementById(inputId);
             if (!inp) return;
@@ -702,17 +792,28 @@
         const mobileRegisterBtn = document.getElementById('mobileRegisterBtn');
         const mobileLoginBtn = document.getElementById('mobileLoginBtn');
 
+        function syncViewFromUrl() {
+            if (!authWrapper) return;
+            const isRegisterPath = window.location.pathname.replace(/\/+$/, '').endsWith('/register');
+            authWrapper.classList.toggle('active', isRegisterPath);
+        }
+
         function showRegister() {
             authWrapper.classList.add("active");
-            // Optionally update URL without reloading
-            window.history.pushState({}, "", "/auth/register");
+            if (!window.location.pathname.replace(/\/+$/, '').endsWith('/register')) {
+                window.history.pushState({ view: 'register' }, "", "/auth/register" + window.location.search);
+            }
         }
 
         function showLogin() {
             authWrapper.classList.remove("active");
-            // Optionally update URL without reloading
-            window.history.pushState({}, "", "/auth/login");
+            if (window.location.pathname.replace(/\/+$/, '').endsWith('/register')) {
+                window.history.pushState({ view: 'login' }, "", "/auth/login" + window.location.search);
+            }
         }
+
+        window.addEventListener('popstate', syncViewFromUrl);
+        window.addEventListener('pageshow', syncViewFromUrl);
 
         if (registerBtn) registerBtn.addEventListener('click', showRegister);
         if (mobileRegisterBtn) mobileRegisterBtn.addEventListener('click', showRegister);

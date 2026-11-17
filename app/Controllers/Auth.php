@@ -76,6 +76,67 @@ class Auth extends BaseController
         return redirect()->to('/dashboard');
     }
 
+    public function captcha()
+    {
+        $form = preg_replace('/[^a-z0-9_]/', '', strtolower((string) $this->request->getGet('form'))) ?: 'login';
+        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        $code = '';
+        for ($i = 0; $i < 5; $i++) {
+            $code .= $chars[random_int(0, strlen($chars) - 1)];
+        }
+
+        session()->set('captcha_' . $form, $code);
+
+        $width = 148;
+        $height = 44;
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '">';
+        $svg .= '<rect width="100%" height="100%" rx="10" fill="#f1f5f9"/>';
+
+        for ($i = 0; $i < 4; $i++) {
+            $x1 = random_int(0, 40);
+            $y1 = random_int(4, $height - 4);
+            $x2 = random_int($width - 40, $width);
+            $y2 = random_int(4, $height - 4);
+            $color = ($i % 2 === 0) ? '#93c5fd' : '#86efac';
+            $svg .= '<line x1="' . $x1 . '" y1="' . $y1 . '" x2="' . $x2 . '" y2="' . $y2 . '" stroke="' . $color . '" stroke-width="1.5"/>';
+        }
+
+        $palette = ['#0A64A4', '#06426e', '#1e40af', '#15803d', '#0f172a'];
+        for ($i = 0; $i < 5; $i++) {
+            $x = 18 + ($i * 25) + random_int(-2, 2);
+            $y = 29 + random_int(-3, 3);
+            $rot = random_int(-14, 14);
+            $col = $palette[random_int(0, count($palette) - 1)];
+            $svg .= '<text x="' . $x . '" y="' . $y . '" fill="' . $col . '" font-family="monospace, sans-serif" font-size="22" font-weight="bold" transform="rotate(' . $rot . ' ' . $x . ' ' . $y . ')">' . $code[$i] . '</text>';
+        }
+
+        $svg .= '</svg>';
+
+        return $this->response
+            ->setHeader('Content-Type', 'image/svg+xml')
+            ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+            ->setBody($svg);
+    }
+
+    private function verifyCaptcha(string $form): bool
+    {
+        // Honeypot anti-bot: jika field tersembunyi diisi bot, tolak langsung
+        if (trim((string) $this->request->getPost('website_hp')) !== '') {
+            return false;
+        }
+
+        $session = session();
+        $expected = strtoupper(trim((string) $session->get('captcha_' . $form)));
+        $session->remove('captcha_' . $form);
+
+        $input = strtoupper(trim((string) $this->request->getPost('captcha')));
+        if ($expected === '' || $input === '') {
+            return false;
+        }
+
+        return hash_equals($expected, $input);
+    }
+
     public function login()
     {
         $next = $this->sanitizeRedirectPath($this->request->getGet('next'));
@@ -96,6 +157,11 @@ class Auth extends BaseController
         $throttleKey = 'login_' . md5((string) $this->request->getIPAddress());
         if ($throttler->check($throttleKey, 8, MINUTE) === false) {
             $session->setFlashdata('msg', 'Terlalu banyak percobaan login. Silakan coba lagi dalam 1 menit.');
+            return redirect()->to('/auth/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
+        }
+
+        if (! $this->verifyCaptcha('login')) {
+            $session->setFlashdata('msg', 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.');
             return redirect()->to('/auth/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
         }
 
@@ -163,6 +229,22 @@ class Auth extends BaseController
 
     public function processRegister()
     {
+        $throttler = \Config\Services::throttler();
+        $throttleKey = 'reg_' . md5((string) $this->request->getIPAddress());
+        if ($throttler->check($throttleKey, 5, MINUTE) === false) {
+            return view('auth/login', [
+                'is_register'   => true,
+                'registerError' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 1 menit.',
+            ]);
+        }
+
+        if (! $this->verifyCaptcha('register')) {
+            return view('auth/login', [
+                'is_register'   => true,
+                'registerError' => 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.',
+            ]);
+        }
+
         $rules = [
             'username'     => 'required|min_length[4]|max_length[100]|is_unique[users.username]',
             'password'     => 'required|min_length[6]',
@@ -208,6 +290,11 @@ class Auth extends BaseController
         $throttleKey = 'mitra_login_' . md5((string) $this->request->getIPAddress());
         if ($throttler->check($throttleKey, 8, MINUTE) === false) {
             $session->setFlashdata('msg', 'Terlalu banyak percobaan login. Silakan coba lagi dalam 1 menit.');
+            return redirect()->to('/mitra/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
+        }
+
+        if (! $this->verifyCaptcha('mitra_login')) {
+            $session->setFlashdata('msg', 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.');
             return redirect()->to('/mitra/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
         }
 
@@ -268,6 +355,22 @@ class Auth extends BaseController
 
     public function processMitraRegister()
     {
+        $throttler = \Config\Services::throttler();
+        $throttleKey = 'mitra_reg_' . md5((string) $this->request->getIPAddress());
+        if ($throttler->check($throttleKey, 5, MINUTE) === false) {
+            return view('auth/mitra_login', [
+                'is_register'   => true,
+                'registerError' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 1 menit.',
+            ]);
+        }
+
+        if (! $this->verifyCaptcha('mitra_register')) {
+            return view('auth/mitra_login', [
+                'is_register'   => true,
+                'registerError' => 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.',
+            ]);
+        }
+
         $rules = [
             'username'     => 'required|min_length[4]|max_length[100]|is_unique[users.username]',
             'password'     => 'required|min_length[6]',

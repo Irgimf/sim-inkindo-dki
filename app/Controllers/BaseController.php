@@ -101,7 +101,10 @@ abstract class BaseController extends Controller
             $ext = 'jpg';
         }
         $binary = base64_decode($matches[2], true);
-        if ($binary === false || strlen($binary) < 64) {
+        if ($binary === false || strlen($binary) < 64 || strlen($binary) > 10 * 1024 * 1024) {
+            return null;
+        }
+        if (@getimagesizefromstring($binary) === false) {
             return null;
         }
 
@@ -136,6 +139,19 @@ abstract class BaseController extends Controller
 
         $ext = strtolower($file->getExtension() ?: pathinfo($file->getClientName(), PATHINFO_EXTENSION));
         if (!in_array($ext, $allowedExts, true)) {
+            return null;
+        }
+
+        // Verifikasi MIME type asli & integritas file di sisi server
+        $mime = strtolower((string) $file->getMimeType());
+        if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {
+            if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], true)) {
+                return null;
+            }
+            if (@getimagesize($file->getTempName()) === false) {
+                return null;
+            }
+        } elseif ($ext === 'pdf' && $mime !== 'application/pdf') {
             return null;
         }
 
