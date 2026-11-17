@@ -40,7 +40,7 @@
             overflow: hidden;
             width: 850px;
             max-width: 95%;
-            min-height: 640px;
+            min-height: 560px;
         }
 
         .auth-captcha-row {
@@ -642,7 +642,9 @@
         <!-- Sign Up Form -->
         <div class="form-container sign-up">
             <form action="/auth/processRegister" method="post">
-                <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
+                <a href="<?= esc(rtrim(config('App')->webProfileURL, '/') . '/') ?>" title="Kembali ke Beranda INKINDO DKI Jakarta" style="display: inline-block; line-height: 0; margin: 0 auto;">
+                    <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
+                </a>
                 <h1 style="color: var(--inkindo-blue);">Buat Akun</h1>
                 <p>Daftar akun SIM-INKINDO DKI untuk mengelola data perusahaan &amp; layanan anggota.</p>
                 
@@ -660,18 +662,10 @@
                 <?php endif; ?>
 
                 <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
+                <input type="hidden" name="captcha" value="">
                 <input type="text" name="username" placeholder="Buat Username" required value="<?= set_value('username') ?>">
                 <input type="password" name="password" placeholder="Buat Password" required>
                 <input type="password" name="confpassword" placeholder="Konfirmasi Password" required>
-                <div class="auth-captcha-row">
-                    <div class="auth-captcha-box">
-                        <img src="/auth/captcha?form=register&v=<?= time() ?>" id="captchaImgRegister" alt="CAPTCHA">
-                        <button type="button" class="auth-captcha-refresh" onclick="refreshCaptcha('captchaImgRegister', 'register')" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
-                    <input type="text" name="captcha" class="auth-captcha-input" placeholder="Kode" maxlength="5" autocomplete="off" required>
-                </div>
                 <button type="submit">Daftar</button>
                 <div class="mobile-auth-switch">
                     <span>Sudah punya akun?</span>
@@ -684,7 +678,9 @@
         <div class="form-container sign-in">
             <form action="/auth/processLogin" method="post">
                 <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
-                <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
+                <a href="<?= esc(rtrim(config('App')->webProfileURL, '/') . '/') ?>" title="Kembali ke Beranda INKINDO DKI Jakarta" style="display: inline-block; line-height: 0; margin: 0 auto;">
+                    <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
+                </a>
                 <h1 style="color: var(--inkindo-blue);">Selamat Datang</h1>
                 <p>Silakan masuk ke akun SIM-INKINDO DKI Anda</p>
                 
@@ -696,6 +692,7 @@
                 <?php endif;?>
 
                 <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
+                <input type="hidden" name="captcha" value="">
                 <div class="auth-input-group">
                     <i class="bi bi-person auth-input-icon"></i>
                     <input type="text" name="username" placeholder="Username atau Email" required>
@@ -706,15 +703,6 @@
                     <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('loginPasswordInput', this)" aria-label="Tampilkan password">
                         <i class="bi bi-eye-slash"></i>
                     </button>
-                </div>
-                <div class="auth-captcha-row">
-                    <div class="auth-captcha-box">
-                        <img src="/auth/captcha?form=login&v=<?= time() ?>" id="captchaImgLogin" alt="CAPTCHA">
-                        <button type="button" class="auth-captcha-refresh" onclick="refreshCaptcha('captchaImgLogin', 'login')" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
-                            <i class="bi bi-arrow-clockwise"></i>
-                        </button>
-                    </div>
-                    <input type="text" name="captcha" class="auth-captcha-input" placeholder="Kode" maxlength="5" autocomplete="off" required>
                 </div>
                 <div class="auth-options-row">
                     <label class="auth-remember-label">
@@ -749,6 +737,28 @@
         </div>
     </div>
 
+    <div class="auth-forgot-modal-backdrop" id="captchaModal">
+        <div class="auth-forgot-modal-card" style="max-width: 360px;">
+            <h3 style="color: var(--inkindo-blue); margin-bottom: 6px; font-size: 19px;">Verifikasi Keamanan</h3>
+            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin-bottom: 16px;">
+                Masukkan kode CAPTCHA di bawah ini untuk melanjutkan.
+            </p>
+            <div class="auth-captcha-row" style="justify-content: center; margin-bottom: 14px;">
+                <div class="auth-captcha-box">
+                    <img src="" id="captchaModalImg" alt="CAPTCHA">
+                    <button type="button" class="auth-captcha-refresh" onclick="refreshModalCaptcha()" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </button>
+                </div>
+                <input type="text" id="captchaModalInput" class="auth-captcha-input" placeholder="Kode" maxlength="5" autocomplete="off" style="max-width: 130px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 12px;">
+            </div>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" onclick="closeCaptchaModal()" style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 18px; font-weight: 600; cursor: pointer;">Batal</button>
+                <button type="button" onclick="submitWithCaptcha()" style="background: var(--inkindo-blue); color: #fff; border: none; border-radius: 12px; padding: 10px 20px; font-weight: 600; cursor: pointer;">Lanjutkan</button>
+            </div>
+        </div>
+    </div>
+
     <div class="auth-forgot-modal-backdrop" id="forgotModal">
         <div class="auth-forgot-modal-card">
             <h3 style="color: var(--inkindo-blue); margin-bottom: 8px; font-size: 19px;">Lupa Password?</h3>
@@ -760,12 +770,72 @@
     </div>
 
     <script>
-        function refreshCaptcha(imgId, formKey) {
-            const img = document.getElementById(imgId);
+        let pendingAuthForm = null;
+        let pendingCaptchaFormKey = 'login';
+
+        function refreshModalCaptcha() {
+            const img = document.getElementById('captchaModalImg');
             if (img) {
-                img.src = '/auth/captcha?form=' + encodeURIComponent(formKey) + '&t=' + Date.now();
+                img.src = '/auth/captcha?form=' + encodeURIComponent(pendingCaptchaFormKey) + '&t=' + Date.now();
             }
         }
+
+        function openCaptchaModal(formEl, formKey) {
+            pendingAuthForm = formEl;
+            pendingCaptchaFormKey = formKey;
+            const inp = document.getElementById('captchaModalInput');
+            if (inp) inp.value = '';
+            refreshModalCaptcha();
+            document.getElementById('captchaModal')?.classList.add('is-open');
+            setTimeout(() => { if (inp) inp.focus(); }, 80);
+        }
+
+        function closeCaptchaModal() {
+            document.getElementById('captchaModal')?.classList.remove('is-open');
+            pendingAuthForm = null;
+        }
+
+        function submitWithCaptcha() {
+            const inp = document.getElementById('captchaModalInput');
+            const code = (inp ? inp.value : '').trim();
+            if (!code) {
+                if (inp) inp.focus();
+                return;
+            }
+            if (pendingAuthForm) {
+                const hiddenCaptcha = pendingAuthForm.querySelector('input[name="captcha"]');
+                if (hiddenCaptcha) hiddenCaptcha.value = code;
+                const formToSubmit = pendingAuthForm;
+                closeCaptchaModal();
+                formToSubmit.submit();
+            }
+        }
+
+        document.getElementById('captchaModal')?.addEventListener('click', function (e) {
+            if (e.target === this) closeCaptchaModal();
+        });
+        document.getElementById('captchaModalInput')?.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitWithCaptcha();
+            }
+        });
+
+        document.querySelector('.sign-in form')?.addEventListener('submit', function (e) {
+            const hiddenCaptcha = this.querySelector('input[name="captcha"]');
+            if (hiddenCaptcha && !hiddenCaptcha.value.trim()) {
+                e.preventDefault();
+                openCaptchaModal(this, 'login');
+            }
+        });
+        document.querySelector('.sign-up form')?.addEventListener('submit', function (e) {
+            const hiddenCaptcha = this.querySelector('input[name="captcha"]');
+            if (hiddenCaptcha && !hiddenCaptcha.value.trim()) {
+                e.preventDefault();
+                openCaptchaModal(this, 'register');
+            }
+        });
+
         function togglePasswordVisibility(inputId, btn) {
             const inp = document.getElementById(inputId);
             if (!inp) return;
