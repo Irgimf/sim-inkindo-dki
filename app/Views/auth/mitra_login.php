@@ -55,7 +55,16 @@
             overflow: hidden;
             width: 850px;
             max-width: 95%;
-            min-height: 520px;
+            min-height: 560px;
+        }
+
+        .auth-brand-logo {
+            height: 88px;
+            width: auto;
+            max-width: 240px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            display: block;
         }
 
         .auth-wrapper p {
@@ -311,28 +320,190 @@
             padding: 0 12px;
         }
 
+        .mobile-auth-header {
+            display: none;
+        }
+
+        .auth-input-group {
+            position: relative;
+            width: 100%;
+            margin: 7px 0;
+        }
+
+        .auth-input-group .auth-input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #64748b;
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .auth-input-group input {
+            margin: 0;
+            padding-left: 42px;
+            padding-right: 42px;
+        }
+
+        .auth-eye-btn {
+            position: absolute !important;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%) !important;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 4px !important;
+            margin: 0 !important;
+            color: #64748b !important;
+            font-size: 16px !important;
+            text-transform: none !important;
+            letter-spacing: 0 !important;
+            cursor: pointer;
+        }
+
+        .auth-eye-btn:hover {
+            color: var(--inkindo-blue) !important;
+            background: transparent !important;
+            transform: translateY(-50%) !important;
+        }
+
+        .auth-options-row {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 8px 0 4px;
+            font-size: 12.5px;
+        }
+
+        .auth-remember-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #475569;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .auth-remember-label input[type="checkbox"] {
+            width: 15px;
+            height: 15px;
+            margin: 0;
+            padding: 0;
+            accent-color: var(--inkindo-blue);
+            cursor: pointer;
+        }
+
+        .auth-forgot-link {
+            color: var(--inkindo-blue) !important;
+            font-size: 12.5px !important;
+            font-weight: 600 !important;
+            margin: 0 !important;
+            cursor: pointer;
+        }
+
+        .auth-forgot-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.45);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 9999;
+        }
+
+        .auth-forgot-modal-backdrop.is-open {
+            display: flex;
+        }
+
+        .auth-forgot-modal-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 26px 24px;
+            max-width: 380px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.2);
+        }
+
         @media (max-width: 767.98px) {
             body {
                 height: auto;
                 min-height: 100vh;
-                padding: 24px 14px;
+                padding: 56px 28px 36px;
+                justify-content: flex-start;
+                align-items: center;
+                background: #ffffff;
             }
             .auth-wrapper {
                 width: 100%;
-                max-width: 430px;
+                max-width: 335px;
                 min-height: auto;
-                border-radius: 22px;
+                border-radius: 0;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                overflow: visible;
+            }
+            .auth-brand-logo {
+                display: block;
+                height: 175px;
+                width: auto;
+                max-width: 200px;
+                padding: 4px 6px;
+                margin: 0 auto 20px;
             }
             .auth-wrapper form {
-                padding: 32px 22px;
+                padding: 0;
                 height: auto;
+                background: transparent;
             }
             .auth-wrapper h1 {
                 font-size: 24px !important;
             }
             .auth-wrapper p {
-                margin: 10px 0 14px;
+                margin: 6px 0 20px;
                 font-size: 13.5px;
+            }
+            .auth-input-group {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
+                margin: 7px 0;
+            }
+            .auth-input-group input {
+                border-radius: 16px;
+                padding: 14px 42px;
+                background: transparent;
+                border: none;
+            }
+            .auth-wrapper .sign-up input {
+                background: #ffffff;
+                border: 1px solid #e2e8f0;
+                border-radius: 16px;
+                padding: 14px 16px;
+                box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
+                margin: 7px 0;
+            }
+            .auth-options-row {
+                margin: 12px 2px 6px;
+                background: transparent;
+            }
+            .auth-wrapper button[type="submit"] {
+                width: 100%;
+                border-radius: 16px;
+                padding: 14px 20px;
+                margin-top: 12px;
+                box-shadow: 0 8px 20px rgba(10, 100, 164, 0.24);
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
             }
             .auth-wrapper .form-container {
                 position: relative;
@@ -343,6 +514,12 @@
                 transform: none !important;
                 animation: none !important;
                 transition: none;
+                background: transparent;
+            }
+            .mobile-auth-switch {
+                border-top: none !important;
+                margin-top: 18px !important;
+                padding-top: 0 !important;
             }
             .auth-wrapper .sign-in {
                 display: block;
@@ -394,6 +571,7 @@
         <!-- Sign Up Form (Mitra Kerja) -->
         <div class="form-container sign-up">
             <form action="/mitra/processRegister" method="post">
+                <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
                 <h1 style="color: var(--inkindo-blue); font-size: 28px;">Daftar Mitra Kerja</h1>
                 <p>Bergabung sebagai Mitra Kerja strategis INKINDO DKI Jakarta</p>
                 
@@ -422,6 +600,7 @@
         <div class="form-container sign-in">
             <form action="/mitra/processLogin" method="post">
                 <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
+                <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
                 <h1 style="color: var(--inkindo-blue); font-size: 28px;">Login Mitra Kerja</h1>
                 <p>Kelola profil perusahaan, logo, dan katalog produk kemitraan Anda</p>
                 
@@ -432,9 +611,24 @@
                     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                 <?php endif;?>
 
-                <input type="text" name="username" placeholder="Username Mitra / Admin" required>
-                <input type="password" name="password" placeholder="Password" required>
-                <button type="submit">Login</button>
+                <div class="auth-input-group">
+                    <i class="bi bi-person auth-input-icon"></i>
+                    <input type="text" name="username" placeholder="Username atau Email" required>
+                </div>
+                <div class="auth-input-group">
+                    <i class="bi bi-lock auth-input-icon"></i>
+                    <input type="password" name="password" id="mitraLoginPasswordInput" placeholder="Password" required>
+                    <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('mitraLoginPasswordInput', this)" aria-label="Tampilkan password">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="auth-options-row">
+                    <label class="auth-remember-label">
+                        <input type="checkbox" name="remember" value="1"> Remember Me
+                    </label>
+                    <a href="#" class="auth-forgot-link" onclick="openForgotModal(event)">Lupa Password?</a>
+                </div>
+                <button type="submit">Login <i class="bi bi-arrow-right ms-1"></i></button>
                 <div class="mobile-auth-switch">
                     <span>Belum daftar mitra?</span>
                     <button type="button" class="mobile-switch-btn" id="mobileRegisterBtn">Daftar Mitra</button>
@@ -461,17 +655,37 @@
         </div>
     </div>
 
-    <div class="auth-bottom-links">
-        <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>" style="color: #64748b; text-decoration: none; font-weight: 500;">
-            <i class="bi bi-arrow-left"></i> Kembali ke Web Profile INKINDO
-        </a>
-        <span class="auth-link-sep" style="color: #cbd5e1;">|</span>
-        <a href="/auth/login" style="color: var(--inkindo-blue); text-decoration: none; font-weight: 600;">
-            Portal Login Anggota (PT) <i class="bi bi-arrow-right"></i>
-        </a>
+    <div class="auth-forgot-modal-backdrop" id="forgotModal">
+        <div class="auth-forgot-modal-card">
+            <h3 style="color: var(--inkindo-blue); margin-bottom: 8px; font-size: 19px;">Lupa Password?</h3>
+            <p style="font-size: 13.5px; color: #475569; line-height: 1.6; margin-bottom: 18px;">
+                Untuk keamanan akun Mitra Kerja, silakan hubungi Admin Sekretariat DPP INKINDO DKI Jakarta di <strong>+62217942940</strong> atau email <strong>sekretariat@inkindo-dki.org</strong> untuk reset password.
+            </p>
+            <button type="button" onclick="closeForgotModal()" style="background: var(--inkindo-blue); color: #fff; border: none; border-radius: 12px; padding: 10px 24px; font-weight: 600; cursor: pointer;">Mengerti</button>
+        </div>
     </div>
 
     <script>
+        function togglePasswordVisibility(inputId, btn) {
+            const inp = document.getElementById(inputId);
+            if (!inp) return;
+            const isPass = inp.type === 'password';
+            inp.type = isPass ? 'text' : 'password';
+            const icon = btn.querySelector('i');
+            if (icon) {
+                icon.className = isPass ? 'bi bi-eye' : 'bi bi-eye-slash';
+            }
+        }
+        function openForgotModal(e) {
+            if (e) e.preventDefault();
+            document.getElementById('forgotModal')?.classList.add('is-open');
+        }
+        function closeForgotModal() {
+            document.getElementById('forgotModal')?.classList.remove('is-open');
+        }
+        document.getElementById('forgotModal')?.addEventListener('click', function (e) {
+            if (e.target === this) closeForgotModal();
+        });
         const authWrapper = document.getElementById('authWrapper');
         const registerBtn = document.getElementById('registerBtn');
         const loginBtn = document.getElementById('loginBtn');

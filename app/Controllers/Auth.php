@@ -100,10 +100,14 @@ class Auth extends BaseController
         }
 
         $model = new UserModel();
-        $username = $this->request->getVar('username');
+        $username = trim((string) $this->request->getVar('username'));
         $password = $this->request->getVar('password');
 
-        $data = $model->where('username', $username)->first();
+        $data = $model->groupStart()
+            ->where('username', $username)
+            ->orWhere('email', $username)
+            ->groupEnd()
+            ->first();
 
         if ($data) {
             $pass = $data['password'];
@@ -208,10 +212,14 @@ class Auth extends BaseController
         }
 
         $model = new UserModel();
-        $username = $this->request->getVar('username');
+        $username = trim((string) $this->request->getVar('username'));
         $password = $this->request->getVar('password');
 
-        $data = $model->where('username', $username)->first();
+        $data = $model->groupStart()
+            ->where('username', $username)
+            ->orWhere('email', $username)
+            ->groupEnd()
+            ->first();
 
         if ($data) {
             $verify_pass = password_verify($password, $data['password']);
