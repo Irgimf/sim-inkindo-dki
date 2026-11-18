@@ -66,27 +66,33 @@
             text-align: left;
         }
         .user-panel {
-            padding: 15px 25px;
+            padding: 15px 20px;
             display: flex;
             align-items: center;
+            gap: 12px;
             margin-bottom: 10px;
         }
         .user-panel img {
             width: 42px;
             height: 42px;
             border-radius: 50%;
-            margin-right: 15px;
+            flex-shrink: 0;
             object-fit: cover;
             border: 2px solid var(--white);
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
         .user-panel .info {
             color: var(--text-dark);
+            min-width: 0;
+            flex: 1;
         }
         .user-panel .info p {
             margin: 0;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13.5px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .user-panel .info small {
             font-size: 11px;
@@ -292,7 +298,10 @@
                 z-index: 1055;
                 transform: translateX(-105%);
                 transition: transform 0.28s ease, box-shadow 0.28s ease;
-                padding: 12px 8px 28px;
+                padding: 12px 8px 32px;
+            }
+            #sim-auth-float {
+                display: none !important;
             }
             .sidebar.is-open {
                 transform: translateX(0);
@@ -396,9 +405,9 @@
             </div>
             
             <div class="user-panel">
-                <img src="https://ui-avatars.com/api/?name=<?= session()->get('username'); ?>&background=random&color=fff&size=100" alt="User Image">
+                <img src="https://ui-avatars.com/api/?name=<?= urlencode((string) session()->get('username')); ?>&background=random&color=fff&size=100" alt="User Image">
                 <div class="info">
-                    <p><?= session()->get('username'); ?></p>
+                    <p title="<?= esc((string) session()->get('username')); ?>"><?= esc((string) session()->get('username')); ?></p>
                     <small><i class="bi bi-circle-fill text-success" style="font-size: 8px; margin-right: 3px;"></i> Online</small>
                 </div>
             </div>
@@ -552,6 +561,11 @@
                 </li>
                 <?php endif; ?>
                 
+                <li class="d-lg-none">
+                    <a href="/auth/switch-to-web">
+                        <i class="bi bi-arrow-left-right me-2 text-center" style="width: 20px;"></i> <span>Web Inkindo DKI</span>
+                    </a>
+                </li>
                 <li>
                     <a href="/auth/logout">
                         <i class="bi bi-box-arrow-right me-2 text-center" style="width: 20px;"></i> <span>Logout</span>
@@ -574,14 +588,17 @@
                                 SIM-INKINDO DKI
                             </span>
                             <small class="text-truncate" style="font-size: 12px; color: var(--text-muted); font-weight: 500;">
-                                <?= session()->get('role') === 'mitra'
-                                    ? 'Sistem Informasi &amp; Manajemen INKINDO DKI &bull; Portal Mitra Kerja'
-                                    : 'Sistem Informasi &amp; Manajemen INKINDO DKI' ?>
+                                <?php if (session()->get('role') === 'mitra'): ?>
+                                    <span class="d-none d-sm-inline">Sistem Informasi &amp; Manajemen INKINDO DKI &bull; </span>Portal Mitra Kerja
+                                <?php else: ?>
+                                    <span class="d-none d-sm-inline">Sistem Informasi &amp; Manajemen INKINDO DKI</span>
+                                    <span class="d-inline d-sm-none">Sistem Manajemen INKINDO DKI</span>
+                                <?php endif; ?>
                             </small>
                         </div>
                     </div>
-                    <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3 fw-semibold flex-shrink-0">
-                        <i class="bi bi-globe2 me-sm-1"></i> <span class="d-none d-sm-inline">Lihat Web Profile</span><span class="d-inline d-sm-none">Web</span>
+                    <a href="/auth/switch-to-web" class="btn btn-sm btn-outline-primary rounded-pill px-2 px-sm-3 fw-semibold flex-shrink-0 text-nowrap" style="font-size: 12.5px;">
+                        <i class="bi bi-globe2 me-1"></i><span class="d-none d-sm-inline">Beralih ke Web Inkindo DKI</span><span class="d-inline d-sm-none">Web</span>
                     </a>
                 </div>
             </nav>
@@ -651,6 +668,55 @@
             outline: none;
             border-color: var(--inkindo-blue);
             box-shadow: 0 0 0 3px rgba(10, 100, 164, 0.1);
+        }
+        @media (max-width: 767.98px) {
+            .top-app-navbar .navbar-brand {
+                font-size: 15.5px !important;
+            }
+            .top-app-navbar .sidebar-toggle-btn {
+                width: 36px;
+                height: 36px;
+            }
+            .main-content-wrapper > .container-fluid {
+                padding-bottom: 28px !important;
+            }
+            .card {
+                border-radius: 16px !important;
+            }
+            .card-body {
+                padding: 14px !important;
+            }
+            div.dataTables_wrapper div.dataTables_filter,
+            div.dataTables_wrapper div.dataTables_length {
+                text-align: left !important;
+                width: 100%;
+                margin-bottom: 12px;
+            }
+            div.dataTables_wrapper div.dataTables_filter label {
+                display: flex !important;
+                flex-direction: column;
+                align-items: stretch !important;
+                gap: 6px;
+                width: 100%;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text-muted);
+            }
+            div.dataTables_wrapper div.dataTables_filter input {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin-left: 0 !important;
+                padding: 8px 12px;
+            }
+            div.dataTables_wrapper div.dataTables_info {
+                padding-top: 12px !important;
+                text-align: center !important;
+                font-size: 12px;
+            }
+            div.dataTables_wrapper div.dataTables_paginate ul.pagination {
+                justify-content: center !important;
+                margin-top: 8px !important;
+            }
         }
     </style>
     <script>
@@ -737,8 +803,8 @@
                 <i id="sim-auth-float-chevron" class="bi bi-chevron-right" style="font-size: 14px; color: #64748b; transition: transform 0.2s ease;"></i>
             </button>
             <div id="sim-auth-float-body" style="display: none; align-items: center; gap: 8px; padding-left: 10px; border-left: 1px solid rgba(15, 23, 42, 0.1); flex-shrink: 0;">
-                <a href="/auth/switch-to-web" title="Pindah ke Web INKINDO" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(10, 100, 164, 0.94); color: #ffffff; text-decoration: none; padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 12.5px; white-space: nowrap; box-shadow: 0 4px 12px rgba(10, 100, 164, 0.24);">
-                    <i class="bi bi-arrow-left-right"></i> Web INKINDO
+                <a href="/auth/switch-to-web" title="Beralih ke Web Inkindo DKI" style="display: inline-flex; align-items: center; gap: 6px; background: rgba(10, 100, 164, 0.94); color: #ffffff; text-decoration: none; padding: 8px 14px; border-radius: 999px; font-weight: 600; font-size: 12.5px; white-space: nowrap; box-shadow: 0 4px 12px rgba(10, 100, 164, 0.24);">
+                    <i class="bi bi-arrow-left-right"></i> Web Inkindo DKI
                 </a>
                 <a href="/auth/logout" title="Logout" aria-label="Logout" style="display: inline-flex; align-items: center; justify-content: center; width: 36px; height: 36px; background: rgba(254, 226, 226, 0.88); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.24); text-decoration: none; border-radius: 50%; flex-shrink: 0;">
                     <i class="bi bi-box-arrow-right" style="font-size: 16px;"></i>

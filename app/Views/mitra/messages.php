@@ -160,9 +160,9 @@ $unreadKonsultasiCount = (int) ($unreadKonsultasiCount ?? 0);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="d-flex justify-content-center gap-1 flex-nowrap">
+                                <div class="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
                                     <button type="button"
-                                            class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold"
+                                            class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 text-nowrap flex-shrink-0"
                                             data-id="<?= $msg['id']; ?>"
                                             data-perusahaan="<?= esc($msg['nama_perusahaan'], 'attr'); ?>"
                                             data-pic="<?= esc($msg['nama_pic'], 'attr'); ?>"
@@ -174,10 +174,10 @@ $unreadKonsultasiCount = (int) ($unreadKonsultasiCount ?? 0);
                                             data-is-read="<?= (int)$msg['is_read']; ?>"
                                             onclick="openReadMessageModal(this)"
                                             title="Baca Isi Pesan">
-                                        <i class="bi bi-envelope-open me-1"></i> Baca
+                                        <i class="bi bi-envelope-open"></i> Baca
                                     </button>
-                                    <a href="/mitra/deleteMessage/<?= $msg['id']; ?>" class="btn btn-sm btn-danger rounded-pill px-2 fw-semibold" onclick="return confirm('Hapus pesan masuk ini?');">
-                                        Hapus
+                                    <a href="/mitra/deleteMessage/<?= $msg['id']; ?>" class="btn btn-sm btn-danger rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 text-nowrap flex-shrink-0" onclick="return confirm('Hapus pesan masuk ini?');">
+                                        <i class="bi bi-trash"></i> Hapus
                                     </a>
                                 </div>
                             </td>
@@ -244,9 +244,9 @@ $unreadKonsultasiCount = (int) ($unreadKonsultasiCount ?? 0);
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <div class="d-flex justify-content-center gap-1 flex-nowrap">
+                                <div class="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
                                     <button type="button"
-                                            class="btn btn-sm btn-primary rounded-pill px-2 fw-semibold"
+                                            class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 text-nowrap flex-shrink-0"
                                             data-id="<?= $km['id']; ?>"
                                             data-kategori="<?= esc($km['kategori'], 'attr'); ?>"
                                             data-nama="<?= esc($km['nama'], 'attr'); ?>"
@@ -259,10 +259,10 @@ $unreadKonsultasiCount = (int) ($unreadKonsultasiCount ?? 0);
                                             data-is-read="<?= (int)$km['is_read']; ?>"
                                             onclick="openReadKonsultasiModal(this)"
                                             title="Baca Isi Pesan Konsultasi">
-                                        <i class="bi bi-envelope-open me-1"></i> Baca
+                                        <i class="bi bi-envelope-open"></i> Baca
                                     </button>
-                                    <a href="/mitra/deleteKonsultasiMessage/<?= $km['id']; ?>" class="btn btn-sm btn-danger rounded-pill px-2 fw-semibold" onclick="return confirm('Hapus pesan konsultasi ini?');">
-                                        Hapus
+                                    <a href="/mitra/deleteKonsultasiMessage/<?= $km['id']; ?>" class="btn btn-sm btn-danger rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center justify-content-center gap-1 text-nowrap flex-shrink-0" onclick="return confirm('Hapus pesan konsultasi ini?');">
+                                        <i class="bi bi-trash"></i> Hapus
                                     </a>
                                 </div>
                             </td>
