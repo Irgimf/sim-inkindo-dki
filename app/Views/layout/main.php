@@ -398,7 +398,9 @@
         <!-- Sidebar -->
         <div class="sidebar d-flex flex-column" id="appSidebar">
             <div class="sidebar-header">
-                <img src="/logo-inkindo.png" alt="INKINDO DKI" style="max-width: 65%; height: auto;">
+                <a href="/auth/switch-to-web" title="Kembali ke Beranda Web Inkindo DKI" style="display: inline-block; max-width: 65%;">
+                    <img src="/logo-inkindo.png" alt="INKINDO DKI" style="max-width: 100%; height: auto; display: block;">
+                </a>
                 <button type="button" class="btn btn-sm btn-light border rounded-circle d-lg-none sidebar-close-btn flex-shrink-0" id="mobileSidebarClose" aria-label="Tutup Menu">
                     <i class="bi bi-x-lg"></i>
                 </button>

@@ -651,7 +651,7 @@
                     </div>
                 <?php endif; ?>
 
-                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
+                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
                 <input type="hidden" name="captcha" value="">
                 <input type="text" name="username" placeholder="Buat Username Mitra" required value="<?= set_value('username') ?>">
                 <input type="password" name="password" placeholder="Buat Password (min. 6 karakter)" required>
@@ -681,7 +681,7 @@
                     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                 <?php endif;?>
 
-                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
+                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
                 <input type="hidden" name="captcha" value="">
                 <div class="auth-input-group">
                     <i class="bi bi-person auth-input-icon"></i>
@@ -735,7 +735,7 @@
             </p>
             <div class="auth-captcha-row" style="justify-content: center; margin-bottom: 14px;">
                 <div class="auth-captcha-box">
-                    <img src="" id="captchaModalImg" alt="CAPTCHA">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="captchaModalImg" alt="CAPTCHA">
                     <button type="button" class="auth-captcha-refresh" onclick="refreshModalCaptcha()" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>

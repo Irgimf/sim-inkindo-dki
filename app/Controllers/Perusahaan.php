@@ -34,6 +34,27 @@ class Perusahaan extends BaseController
         return view('perusahaan/index', $data);
     }
 
+    public function onboarding()
+    {
+        $role = session()->get('role');
+        $userId = session()->get('id');
+
+        if ($role === 'user') {
+            $existing = $this->companyModel->where('user_id', $userId)->first();
+            if ($existing) {
+                return redirect()->to('/perusahaan');
+            }
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userId ? $userModel->find($userId) : null;
+
+        return view('perusahaan/onboarding', [
+            'title'     => 'Lengkapi Data Perusahaan',
+            'userEmail' => $user['email'] ?? session()->get('username') ?? '',
+        ]);
+    }
+
     public function create()
     {
         $role = session()->get('role');

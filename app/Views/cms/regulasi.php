@@ -19,7 +19,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4 mt-2 flex-wrap gap-3">
     <div>
         <h3 class="fw-bold mb-1" style="color: var(--inkindo-blue);">Admin CMS — Regulasi</h3>
-        <p class="text-muted small mb-0">Kelola dokumen <strong>Regulasi &amp; Kebijakan</strong> pada halaman <code>regulasi.html</code> di <code>inkindo-dki-web</code> (maksimal 6 data per halaman).</p>
+        <p class="text-muted small mb-0">Kelola dokumen <strong>Regulasi &amp; Kebijakan</strong> pada halaman <code>regulasi.html</code> di <code>inkindo-dki-web</code> (maksimal 10 data per halaman).</p>
     </div>
     <div class="d-flex gap-2 flex-wrap">
         <a href="<?= esc(rtrim(config('App')->webProfileURL, '/')); ?>/regulasi.html" target="_blank" class="btn btn-outline-primary rounded-pill px-3 fw-semibold">

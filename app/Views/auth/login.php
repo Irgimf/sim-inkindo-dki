@@ -639,40 +639,12 @@
 <body>
 
     <div class="auth-wrapper <?= (isset($is_register) && $is_register) ? 'active' : '' ?>" id="authWrapper">
-        <!-- Sign Up Form -->
-        <div class="form-container sign-up">
-            <form action="/auth/processRegister" method="post">
-                <a href="<?= esc(rtrim(config('App')->webProfileURL, '/') . '/') ?>" title="Kembali ke Beranda INKINDO DKI Jakarta" style="display: inline-block; line-height: 0; margin: 0 auto;">
-                    <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
-                </a>
-                <h1 style="color: var(--inkindo-blue);">Buat Akun</h1>
-                <p>Daftar akun SIM-INKINDO DKI untuk mengelola data perusahaan &amp; layanan anggota.</p>
-                
-                <?php if(isset($registerError)): ?>
-                    <div class="alert alert-danger"><?= esc($registerError) ?></div>
-                <?php endif; ?>
-                <?php if(isset($validation)): ?>
-                    <div class="alert alert-danger">
-                        <ul class="list-unstyled">
-                        <?php foreach($validation->getErrors() as $error): ?>
-                            <li><?= esc($error) ?></li>
-                        <?php endforeach ?>
-                        </ul>
-                    </div>
-                <?php endif; ?>
+        <!-- Sign Up Form (2 Konsep Register Anggota) -->
+        <!-- 1. KONSEP SEMENTARA (Belum ada akses database KTA Online) - AKTIF -->
+        <?php /* <?= view('auth/partials/register_anggota_manual', get_defined_vars()) ?> */ ?>
 
-                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
-                <input type="hidden" name="captcha" value="">
-                <input type="text" name="username" placeholder="Buat Username" required value="<?= set_value('username') ?>">
-                <input type="password" name="password" placeholder="Buat Password" required>
-                <input type="password" name="confpassword" placeholder="Konfirmasi Password" required>
-                <button type="submit">Daftar</button>
-                <div class="mobile-auth-switch">
-                    <span>Sudah punya akun?</span>
-                    <button type="button" class="mobile-switch-btn" id="mobileLoginBtn">Masuk di sini</button>
-                </div>
-            </form>
-        </div>
+        <!-- 2. KONSEP INTEGRASI KTA ONLINE (Hapus comment di bawah dan comment konsep 1 di atas jika sudah ada akses database KTA Online) -->
+        <?= view('auth/partials/register_anggota_kta_online', get_defined_vars()) ?>
 
         <!-- Sign In Form -->
         <div class="form-container sign-in">
@@ -691,7 +663,7 @@
                     <div class="alert alert-success"><?= session()->getFlashdata('success') ?></div>
                 <?php endif;?>
 
-                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="off" class="auth-hp-field" aria-hidden="true">
+                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
                 <input type="hidden" name="captcha" value="">
                 <div class="auth-input-group">
                     <i class="bi bi-person auth-input-icon"></i>
@@ -745,7 +717,7 @@
             </p>
             <div class="auth-captcha-row" style="justify-content: center; margin-bottom: 14px;">
                 <div class="auth-captcha-box">
-                    <img src="" id="captchaModalImg" alt="CAPTCHA">
+                    <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" id="captchaModalImg" alt="CAPTCHA">
                     <button type="button" class="auth-captcha-refresh" onclick="refreshModalCaptcha()" title="Ganti kode CAPTCHA" aria-label="Refresh CAPTCHA">
                         <i class="bi bi-arrow-clockwise"></i>
                     </button>
@@ -783,6 +755,8 @@
         function openCaptchaModal(formEl, formKey) {
             pendingAuthForm = formEl;
             pendingCaptchaFormKey = formKey;
+            const hiddenCaptcha = formEl ? formEl.querySelector('input[name="captcha"]') : null;
+            if (hiddenCaptcha) hiddenCaptcha.value = '';
             const inp = document.getElementById('captchaModalInput');
             if (inp) inp.value = '';
             refreshModalCaptcha();
@@ -828,12 +802,48 @@
                 openCaptchaModal(this, 'login');
             }
         });
+        const regPassInput = document.getElementById('regPasswordInput');
+        const regConfPassInput = document.getElementById('regConfPasswordInput');
+        const regPassMsg = document.getElementById('regPasswordMatchMsg');
+
+        function checkRegisterPasswordMatch() {
+            if (!regPassInput || !regConfPassInput || !regPassMsg) return true;
+            const p1 = regPassInput.value;
+            const p2 = regConfPassInput.value;
+            if (!p2) {
+                regPassMsg.textContent = '';
+                return true;
+            }
+            if (p1 !== p2) {
+                regPassMsg.textContent = 'Password tidak sama';
+                regPassMsg.style.color = '#dc2626';
+                return false;
+            }
+            regPassMsg.textContent = 'Password sesuai';
+            regPassMsg.style.color = '#16a34a';
+            return true;
+        }
+
+        if (regPassInput) regPassInput.addEventListener('input', checkRegisterPasswordMatch);
+        if (regConfPassInput) regConfPassInput.addEventListener('input', checkRegisterPasswordMatch);
+
         document.querySelector('.sign-up form')?.addEventListener('submit', function (e) {
+            if (!checkRegisterPasswordMatch()) {
+                e.preventDefault();
+                if (regConfPassInput) regConfPassInput.focus();
+                return;
+            }
             const hiddenCaptcha = this.querySelector('input[name="captcha"]');
             if (hiddenCaptcha && !hiddenCaptcha.value.trim()) {
                 e.preventDefault();
                 openCaptchaModal(this, 'register');
             }
+        });
+
+        window.addEventListener('pageshow', function () {
+            document.querySelectorAll('input[name="captcha"]').forEach((el) => {
+                el.value = '';
+            });
         });
 
         function togglePasswordVisibility(inputId, btn) {

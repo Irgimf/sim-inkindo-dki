@@ -27,6 +27,7 @@ $routes->get('/dashboard', 'Dashboard::index', ['filter' => 'role:admin']);
 // Perusahaan Routes
 $routes->group('perusahaan', ['filter' => 'role:admin,user'], static function ($routes) {
     $routes->get('/', 'Perusahaan::index');
+    $routes->get('onboarding', 'Perusahaan::onboarding');
     $routes->get('create', 'Perusahaan::create');
     $routes->post('store', 'Perusahaan::store');
     $routes->get('edit/(:num)', 'Perusahaan::edit/$1');

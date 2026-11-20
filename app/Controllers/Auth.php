@@ -127,13 +127,13 @@ class Auth extends BaseController
 
         $session = session();
         $expected = strtoupper(trim((string) $session->get('captcha_' . $form)));
-        $session->remove('captcha_' . $form);
-
         $input = strtoupper(trim((string) $this->request->getPost('captcha')));
+
         if ($expected === '' || $input === '') {
             return false;
         }
 
+        $session->remove('captcha_' . $form);
         return hash_equals($expected, $input);
     }
 
@@ -206,6 +206,11 @@ class Auth extends BaseController
                     return redirect()->to('/mitra');
                 }
                 if ($normalizedRole === 'user') {
+                    $companyModel = new \App\Models\CompanyModel();
+                    $hasCompany = $companyModel->where('user_id', $data['id'])->first();
+                    if (! $hasCompany) {
+                        return redirect()->to('/perusahaan/onboarding');
+                    }
                     return redirect()->to('/perusahaan');
                 }
                 return redirect()->to('/dashboard');
@@ -246,22 +251,35 @@ class Auth extends BaseController
         }
 
         $rules = [
-            'username'     => 'required|min_length[4]|max_length[100]|is_unique[users.username]',
+            'email'        => 'required|valid_email|max_length[150]|is_unique[users.email]|is_unique[users.username]',
             'password'     => 'required|min_length[6]',
             'confpassword' => 'matches[password]',
         ];
 
         if ($this->validate($rules)) {
             $model = new UserModel();
-            $username = $this->request->getVar('username');
+            $email = strtolower(trim((string) $this->request->getVar('email')));
             $data = [
-                'username' => $username,
-                'name'     => $username,
+                'username' => $email,
+                'email'    => $email,
+                'name'     => $email,
                 'role'     => 'user',
                 'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
             ];
             $model->save($data);
-            return redirect()->to('/auth/login')->with('success', 'Registrasi Anggota berhasil. Silakan login.');
+            $newUserId = (int) $model->getInsertID();
+
+            $session = session();
+            $session->regenerate(true);
+            $session->set([
+                'id'           => $newUserId,
+                'username'     => $email,
+                'role'         => 'user',
+                'login_portal' => 'anggota',
+                'logged_in'    => true,
+            ]);
+
+            return redirect()->to('/perusahaan/onboarding')->with('success', 'Akun berhasil dibuat. Silakan lengkapi data perusahaan (PT) Anda.');
         } else {
             $data['validation'] = $this->validator;
             $data['is_register'] = true;
