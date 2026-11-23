@@ -653,9 +653,22 @@
 
                 <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
                 <input type="hidden" name="captcha" value="">
-                <input type="text" name="username" placeholder="Buat Username Mitra" required value="<?= set_value('username') ?>">
-                <input type="password" name="password" placeholder="Buat Password (min. 6 karakter)" required>
-                <input type="password" name="confpassword" placeholder="Konfirmasi Password" required>
+                <input type="email" name="email" placeholder="Masukkan Email Mitra" required value="<?= set_value('email') ?>" autocomplete="email">
+                <div class="auth-input-group">
+                    <i class="bi bi-lock auth-input-icon"></i>
+                    <input type="password" name="password" id="mitraRegPasswordInput" placeholder="Buat Password (min. 6 karakter)" minlength="6" required autocomplete="new-password">
+                    <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('mitraRegPasswordInput', this)" aria-label="Tampilkan password">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                <div class="auth-input-group">
+                    <i class="bi bi-shield-lock auth-input-icon"></i>
+                    <input type="password" name="confpassword" id="mitraRegConfPasswordInput" placeholder="Konfirmasi Password" required autocomplete="new-password">
+                    <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('mitraRegConfPasswordInput', this)" aria-label="Tampilkan konfirmasi password">
+                        <i class="bi bi-eye-slash"></i>
+                    </button>
+                </div>
+                <div id="mitraRegPasswordMatchMsg" style="width: 100%; text-align: left; font-size: 12px; font-weight: 600; min-height: 18px; margin: 2px 0 4px;"></div>
                 <button type="submit">Daftar Mitra</button>
                 <div class="mobile-auth-switch">
                     <span>Sudah terdaftar mitra?</span>
@@ -818,12 +831,48 @@
                 openCaptchaModal(this, 'mitra_login');
             }
         });
+        const mitraRegPassInput = document.getElementById('mitraRegPasswordInput');
+        const mitraRegConfPassInput = document.getElementById('mitraRegConfPasswordInput');
+        const mitraRegPassMsg = document.getElementById('mitraRegPasswordMatchMsg');
+
+        function checkMitraRegisterPasswordMatch() {
+            if (!mitraRegPassInput || !mitraRegConfPassInput || !mitraRegPassMsg) return true;
+            const p1 = mitraRegPassInput.value;
+            const p2 = mitraRegConfPassInput.value;
+            if (!p2) {
+                mitraRegPassMsg.textContent = '';
+                return true;
+            }
+            if (p1 !== p2) {
+                mitraRegPassMsg.textContent = 'Password tidak sama';
+                mitraRegPassMsg.style.color = '#dc2626';
+                return false;
+            }
+            mitraRegPassMsg.textContent = 'Password sesuai';
+            mitraRegPassMsg.style.color = '#16a34a';
+            return true;
+        }
+
+        if (mitraRegPassInput) mitraRegPassInput.addEventListener('input', checkMitraRegisterPasswordMatch);
+        if (mitraRegConfPassInput) mitraRegConfPassInput.addEventListener('input', checkMitraRegisterPasswordMatch);
+
         document.querySelector('.sign-up form')?.addEventListener('submit', function (e) {
+            if (!checkMitraRegisterPasswordMatch()) {
+                e.preventDefault();
+                if (mitraRegConfPassInput) mitraRegConfPassInput.focus();
+                return;
+            }
             const hiddenCaptcha = this.querySelector('input[name="captcha"]');
             if (hiddenCaptcha && !hiddenCaptcha.value.trim()) {
                 e.preventDefault();
                 openCaptchaModal(this, 'mitra_register');
             }
+        });
+
+        window.addEventListener('pageshow', function () {
+            document.querySelectorAll('input[name="captcha"]').forEach((el) => {
+                el.value = '';
+            });
         });
 
         function togglePasswordVisibility(inputId, btn) {

@@ -203,6 +203,11 @@ class Auth extends BaseController
                 }
 
                 if ($normalizedRole === 'mitra') {
+                    $mitraModel = new \App\Models\MitraKerjaModel();
+                    $hasMitra = $mitraModel->where('user_id', $data['id'])->first();
+                    if (! $hasMitra) {
+                        return redirect()->to('/mitra/onboarding');
+                    }
                     return redirect()->to('/mitra');
                 }
                 if ($normalizedRole === 'user') {
@@ -352,6 +357,14 @@ class Auth extends BaseController
                     return $this->createWebSsoRedirect((int) $data['id'], $next);
                 }
 
+                if ($normalizedRole === 'mitra') {
+                    $mitraModel = new \App\Models\MitraKerjaModel();
+                    $hasMitra = $mitraModel->where('user_id', $data['id'])->first();
+                    if (! $hasMitra) {
+                        return redirect()->to('/mitra/onboarding');
+                    }
+                }
+
                 return redirect()->to('/mitra');
             } else {
                 $session->setFlashdata('msg', 'Password Salah');
@@ -390,22 +403,35 @@ class Auth extends BaseController
         }
 
         $rules = [
-            'username'     => 'required|min_length[4]|max_length[100]|is_unique[users.username]',
+            'email'        => 'required|valid_email|max_length[150]|is_unique[users.email]|is_unique[users.username]',
             'password'     => 'required|min_length[6]',
             'confpassword' => 'matches[password]',
         ];
 
         if ($this->validate($rules)) {
             $model = new UserModel();
-            $username = $this->request->getVar('username');
+            $email = strtolower(trim((string) $this->request->getVar('email')));
             $data = [
-                'username' => $username,
-                'name'     => $username,
+                'username' => $email,
+                'email'    => $email,
+                'name'     => $email,
                 'role'     => 'mitra',
                 'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
             ];
             $model->save($data);
-            return redirect()->to('/mitra/login')->with('success', 'Registrasi Mitra Kerja berhasil. Silakan login untuk mengelola profil & produk mitra Anda.');
+            $newUserId = (int) $model->getInsertID();
+
+            $session = session();
+            $session->regenerate(true);
+            $session->set([
+                'id'           => $newUserId,
+                'username'     => $email,
+                'role'         => 'mitra',
+                'login_portal' => 'mitra',
+                'logged_in'    => true,
+            ]);
+
+            return redirect()->to('/mitra/onboarding')->with('success', 'Akun Mitra Kerja berhasil dibuat. Silakan lengkapi profil perusahaan mitra Anda.');
         } else {
             $data['validation'] = $this->validator;
             $data['is_register'] = true;

@@ -85,6 +85,31 @@ class Mitra extends BaseController
         return view('mitra/index', $data);
     }
 
+    public function onboarding()
+    {
+        $role = session()->get('role');
+        $userId = session()->get('id');
+
+        if ($role === 'user') {
+            return redirect()->to('/perusahaan');
+        }
+
+        if ($role === 'mitra') {
+            $existing = $this->mitraModel->where('user_id', $userId)->first();
+            if ($existing) {
+                return redirect()->to('/mitra');
+            }
+        }
+
+        $userModel = new \App\Models\UserModel();
+        $user = $userId ? $userModel->find($userId) : null;
+
+        return view('mitra/onboarding', [
+            'title'     => 'Lengkapi Profil Mitra Kerja',
+            'userEmail' => $user['email'] ?? session()->get('username') ?? '',
+        ]);
+    }
+
     public function create()
     {
         $role = session()->get('role');

@@ -55,6 +55,7 @@ $routes->group('sbu', ['filter' => 'role:admin,user'], static function ($routes)
 // Mitra Kerja Management Routes
 $routes->group('mitra', ['filter' => 'role:admin,mitra'], static function ($routes) {
     $routes->get('/', 'Mitra::index');
+    $routes->get('onboarding', 'Mitra::onboarding');
     $routes->get('create', 'Mitra::create');
     $routes->post('store', 'Mitra::store');
     $routes->get('edit/(:num)', 'Mitra::edit/$1');
