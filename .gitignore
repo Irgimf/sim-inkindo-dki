@@ -63,6 +63,11 @@ Vagrantfile
 /writable/debugbar/*
 !/writable/debugbar/index.html
 
+/writable/*.db
+/writable/*.sqlite
+/writable/*.sql
+/writable/*.json
+
 php_errors.log
 
 #-------------------------

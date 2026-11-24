@@ -39,9 +39,7 @@ $routes->group('perusahaan', ['filter' => 'role:admin,user'], static function ($
 $routes->group('sbu', ['filter' => 'role:admin,user'], static function ($routes) {
     $routes->get('/', 'Sbu::index');
     $routes->get('detail/(:num)', 'Sbu::detail/$1');
-    $routes->get('create', 'Sbu::create');
     $routes->post('store', 'Sbu::store');
-    $routes->get('edit/(:num)', 'Sbu::edit/$1');
     $routes->post('update/(:num)', 'Sbu::update/$1');
     $routes->post('delete/(:num)', 'Sbu::delete/$1');
 
