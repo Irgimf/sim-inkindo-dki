@@ -170,17 +170,25 @@ class Pencarian extends BaseController
         echo "<th>Nilai Proyek</th>";
         echo "</tr>";
         
+        $safeCell = static function ($value): string {
+            $str = (string) ($value ?? '');
+            if ($str !== '' && preg_match('/^[=+\-@\t\r]/', $str)) {
+                $str = "'" . $str;
+            }
+            return htmlspecialchars($str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+        };
+
         $no = 1;
         foreach ($results as $row) {
             echo "<tr>";
             echo "<td>" . $no++ . "</td>";
-            echo "<td>" . htmlspecialchars($row['nama_pt'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['c_kualifikasi'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['kategori_sbu'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['kode_kbli'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['judul_kbli'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['nama_pekerjaan'] ?? '') . "</td>";
-            echo "<td>" . htmlspecialchars($row['nilai_proyek'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['nama_pt'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['c_kualifikasi'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['kategori_sbu'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['kode_kbli'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['judul_kbli'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['nama_pekerjaan'] ?? '') . "</td>";
+            echo "<td>" . $safeCell($row['nilai_proyek'] ?? '') . "</td>";
             echo "</tr>";
         }
         

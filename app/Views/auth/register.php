@@ -14,6 +14,7 @@
             <?php endif;?>
 
             <form action="/auth/processRegister" method="post">
+<?= csrf_field() ?>
                 <div class="mb-3">
                     <label class="form-label fw-semibold">Username</label>
                     <input type="text" name="username" class="form-control" value="<?= set_value('username') ?>" required placeholder="Pilih username">

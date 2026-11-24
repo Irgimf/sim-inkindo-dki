@@ -139,86 +139,19 @@ class CompanyModel extends Model
     }
 
     /**
-     * Sync a single company and its SBU rows to the `members` table used by ProjectWeb (Laravel).
+     * Single Source of Truth:
+     * `companies`, `sbu`, dan `sbu_projects` kini menjadi sumber data tunggal
+     * bagi sim-inkindo-dki maupun inkindo-dki-web, sehingga tidak perlu lagi
+     * menduplikasi data ke tabel `members`.
      */
     public function syncCompanyToMember(int $companyId): void
     {
+        // Pertahankan method sebagai no-op untuk kompatibilitas pemanggil lama.
         self::ensureJenisSbuColumn();
-
-        $company = $this->find($companyId);
-        if (!$company) {
-            return;
-        }
-
-        $db = \Config\Database::connect();
-        if (!$db->tableExists('members')) {
-            return;
-        }
-
-        // Build sbu_items JSON directly 1-to-1 from `sbu` table for this company (without parent PR1/PR2 grouping)
-        $sbuRows = $db->table('sbu')->where('company_id', $companyId)->orderBy('id', 'ASC')->get()->getResultArray();
-        $sbuItems = [];
-        foreach ($sbuRows as $s) {
-            $subLabel = trim(($s['kode_kbli'] ?? '') . ' - ' . ($s['judul_kbli'] ?? ''), ' -');
-            $kelas = $s['kualifikasi'] ?: ($company['kualifikasi'] ?: 'Menengah');
-            $masa = !empty($s['masa_berlaku']) ? date('d-m-Y', strtotime($s['masa_berlaku'])) : '-';
-            $jenisSbu = self::resolveJenisSbu($s['jenis_sbu'] ?? null, (string) ($s['kode_kbli'] ?? ''), (string) ($company['kategori_sbu'] ?? 'Jasa Konstruksi'));
-
-            if ($subLabel !== '') {
-                $sbuItems[] = [
-                    'code'        => $subLabel,
-                    'jenis'       => $jenisSbu,
-                    'kelas'       => $kelas,
-                    'masaBerlaku' => $masa,
-                    'subbidang'   => [],
-                ];
-            }
-        }
-        $sbuItemsJson = json_encode($sbuItems, JSON_UNESCAPED_UNICODE);
-
-        $now = date('Y-m-d H:i:s');
-        $memberData = [
-            'name'            => $company['nama_pt'],
-            'npa'             => $company['no_kta'],
-            'status'          => !empty($company['status']) ? $company['status'] : 'Penuh',
-            'kualifikasi'     => !empty($company['kualifikasi']) ? $company['kualifikasi'] : 'Menengah',
-            'wilayah'         => !empty($company['wilayah']) ? $company['wilayah'] : 'Jakarta Selatan',
-            'sbu'             => self::mapKategoriToLaravel($company['kategori_sbu'] ?? 'Jasa Konstruksi'),
-            'alamat_domisili' => $company['alamat_pt'] ?? '-',
-            'alamat_surat'    => !empty($company['alamat_surat']) ? $company['alamat_surat'] : ($company['alamat_pt'] ?? '-'),
-            'telepon'         => !empty($company['telepon']) ? $company['telepon'] : '-',
-            'fax'             => !empty($company['fax']) ? $company['fax'] : '-',
-            'email'           => !empty($company['email']) ? $company['email'] : '-',
-            'website'         => !empty($company['website']) ? $company['website'] : '-',
-            'sbu_items'       => $sbuItemsJson,
-            'updated_at'      => $now,
-        ];
-
-        $membersTable = $db->table('members');
-        $existingMember = null;
-
-        if (!empty($company['member_id'])) {
-            $existingMember = $membersTable->where('id', $company['member_id'])->get()->getRowArray();
-        }
-        if (!$existingMember && !empty($company['no_kta'])) {
-            $existingMember = $membersTable->where('npa', $company['no_kta'])->get()->getRowArray();
-        }
-
-        if ($existingMember) {
-            $membersTable->where('id', $existingMember['id'])->update($memberData);
-            if (empty($company['member_id']) || (int)$company['member_id'] !== (int)$existingMember['id']) {
-                $db->table('companies')->where('id', $companyId)->update(['member_id' => $existingMember['id']]);
-            }
-        } else {
-            $memberData['created_at'] = $now;
-            $membersTable->insert($memberData);
-            $newMemberId = $db->insertID();
-            $db->table('companies')->where('id', $companyId)->update(['member_id' => $newMemberId]);
-        }
     }
 
     /**
-     * Delete a company along with its SBUs, SBU projects, and corresponding record in `members`.
+     * Delete a company along with its SBUs and SBU projects atomically.
      */
     public function deleteCompanyAndMember(int $companyId): void
     {
@@ -228,24 +161,17 @@ class CompanyModel extends Model
         }
 
         $db = \Config\Database::connect();
+        $db->transStart();
 
-        // Delete SBU projects and SBU records
-        $sbus = $db->table('sbu')->where('company_id', $companyId)->get()->getResultArray();
-        foreach ($sbus as $s) {
-            $db->table('sbu_projects')->where('sbu_id', $s['id'])->delete();
-        }
-        $db->table('sbu')->where('company_id', $companyId)->delete();
-
-        // Delete from members table in ProjectWeb
-        if ($db->tableExists('members')) {
-            if (!empty($company['member_id'])) {
-                $db->table('members')->where('id', $company['member_id'])->delete();
-            } elseif (!empty($company['no_kta'])) {
-                $db->table('members')->where('npa', $company['no_kta'])->delete();
-            }
+        $sbuRows = $db->table('sbu')->select('id')->where('company_id', $companyId)->get()->getResultArray();
+        $sbuIds = array_values(array_filter(array_map(static fn ($s) => (int) ($s['id'] ?? 0), $sbuRows)));
+        if (!empty($sbuIds)) {
+            $db->table('sbu_projects')->whereIn('sbu_id', $sbuIds)->delete();
+            $db->table('sbu')->whereIn('id', $sbuIds)->delete();
         }
 
         $this->delete($companyId);
+        $db->transComplete();
     }
 
     protected bool $allowEmptyInserts = false;

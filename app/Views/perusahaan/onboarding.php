@@ -60,6 +60,7 @@
                     <?php endif; ?>
 
                     <form action="/perusahaan/store" method="post">
+<?= csrf_field() ?>
                         <div class="mb-3 row">
                             <label class="col-sm-3 col-form-label fw-semibold">Nama PT <span class="text-danger">*</span></label>
                             <div class="col-sm-9">

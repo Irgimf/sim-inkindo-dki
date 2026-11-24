@@ -26,6 +26,7 @@
 <?php endif; ?>
 
 <form action="/cms/footer-contact/save" method="post">
+<?= csrf_field() ?>
     <!-- 1. Kontak Bersama (Footer & Menu Samping Hubungi Kami) -->
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">

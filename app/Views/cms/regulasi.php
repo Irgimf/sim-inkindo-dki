@@ -151,6 +151,7 @@
 <div class="modal fade" id="regulasiModal" tabindex="-1" aria-labelledby="regulasiModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form action="/cms/regulasi/save" method="post" enctype="multipart/form-data" class="modal-content border-0 shadow-lg" style="border-radius: 18px;">
+<?= csrf_field() ?>
             <input type="hidden" name="id" id="reg_id" value="0">
             <input type="hidden" name="return_all" value="<?= $filterKategori === '' ? '1' : '0'; ?>">
 

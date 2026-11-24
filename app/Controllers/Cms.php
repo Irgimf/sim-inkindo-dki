@@ -203,9 +203,23 @@ class Cms extends BaseController
             if (!in_array($ext, $allowedExts, true)) {
                 continue;
             }
+            if ((int) $file->getSize() <= 0 || (int) $file->getSize() > 5 * 1024 * 1024) {
+                continue;
+            }
+            $mime = strtolower((string) $file->getMimeType());
+            if (!in_array($mime, ['image/jpeg', 'image/png', 'image/webp', 'image/gif'], true)) {
+                continue;
+            }
+            if (@getimagesize($file->getTempName()) === false) {
+                continue;
+            }
             $newName = 'galeri_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
             $file->move($destDir, $newName);
-            $relativePath = trim($subFolder, '/') . '/' . $newName;
+            $fullPath = $destDir . DIRECTORY_SEPARATOR . $newName;
+            if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp'], true)) {
+                $fullPath = $this->optimizeToWebp($fullPath);
+            }
+            $relativePath = trim($subFolder, '/') . '/' . basename($fullPath);
             $this->syncFileToInkindoWeb($relativePath);
             $uploadedPaths[] = $relativePath;
         }
@@ -635,29 +649,35 @@ class Cms extends BaseController
     public function webAsset(...$segments)
     {
         $relPath = implode('/', $segments);
-        $relPath = ltrim(str_replace(['..', '\\'], ['', '/'], $relPath), '/');
+        $relPath = ltrim(str_replace('\\', '/', $relPath), '/');
+        if ($relPath === '' || str_contains($relPath, '..') || str_contains($relPath, "\0")) {
+            throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+        }
 
-        $candidates = [
-            FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $relPath),
-            $this->getInkindoWebPublicPath() . str_replace('/', DIRECTORY_SEPARATOR, $relPath),
+        $roots = array_filter([
+            realpath(FCPATH),
+            realpath($this->getInkindoWebPublicPath()),
+        ]);
+
+        $mimes = [
+            'jpg'  => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png'  => 'image/png',
+            'webp' => 'image/webp',
+            'gif'  => 'image/gif',
         ];
 
-        foreach ($candidates as $file) {
-            if (is_file($file)) {
-                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-                $mimes = [
-                    'jpg'  => 'image/jpeg',
-                    'jpeg' => 'image/jpeg',
-                    'png'  => 'image/png',
-                    'webp' => 'image/webp',
-                    'gif'  => 'image/gif',
-                    'svg'  => 'image/svg+xml',
-                ];
-                $mime = $mimes[$ext] ?? 'application/octet-stream';
+        foreach ($roots as $root) {
+            $realFile = realpath($root . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relPath));
+            if ($realFile && str_starts_with($realFile, $root . DIRECTORY_SEPARATOR) && is_file($realFile)) {
+                $ext = strtolower(pathinfo($realFile, PATHINFO_EXTENSION));
+                if (!isset($mimes[$ext])) {
+                    throw \CodeIgniter\Exceptions\PageNotFoundException::forPageNotFound();
+                }
                 return $this->response
-                    ->setHeader('Content-Type', $mime)
+                    ->setHeader('Content-Type', $mimes[$ext])
                     ->setHeader('Cache-Control', 'public, max-age=3600')
-                    ->setBody((string) file_get_contents($file));
+                    ->setBody((string) file_get_contents($realFile));
             }
         }
 

@@ -69,6 +69,7 @@
                             </span>
                         <?php else: ?>
                             <form action="/users/updateRole/<?= $uid; ?>" method="post" class="d-inline-flex align-items-center justify-content-center gap-2 m-0">
+<?= csrf_field() ?>
                                 <select name="role" class="form-select form-select-sm rounded-pill" style="width: 135px; font-weight: 600;" onchange="this.form.submit()">
                                     <option value="admin" <?= $normalizedSelectRole === 'admin' ? 'selected' : ''; ?>>Admin</option>
                                     <option value="user" <?= $normalizedSelectRole === 'user' ? 'selected' : ''; ?>>Anggota</option>
@@ -115,6 +116,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/users/store" method="post">
+<?= csrf_field() ?>
                 <div class="modal-body p-4">
                     <div class="mb-3">
                         <label for="new_username" class="form-label fw-semibold small">Username <span class="text-danger">*</span></label>

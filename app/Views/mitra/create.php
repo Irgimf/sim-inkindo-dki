@@ -20,6 +20,7 @@
 
 <div class="card card-custom p-4 border-0 shadow-sm" style="border-radius: 18px;">
     <form action="/mitra/store" method="post" enctype="multipart/form-data">
+<?= csrf_field() ?>
         <div class="row g-3">
             <!-- Upload Logo -->
             <div class="col-md-12 mb-2">

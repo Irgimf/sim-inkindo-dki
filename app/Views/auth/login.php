@@ -649,6 +649,7 @@
         <!-- Sign In Form -->
         <div class="form-container sign-in">
             <form action="/auth/processLogin" method="post">
+<?= csrf_field() ?>
                 <input type="hidden" name="next" value="<?= esc($next ?? '') ?>">
                 <a href="<?= esc(rtrim(config('App')->webProfileURL, '/') . '/') ?>" title="Kembali ke Beranda INKINDO DKI Jakarta" style="display: inline-block; line-height: 0; margin: 0 auto;">
                     <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">

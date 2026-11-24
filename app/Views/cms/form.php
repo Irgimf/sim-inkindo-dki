@@ -42,6 +42,7 @@
 <div class="card border-0 shadow-sm" style="border-radius: 16px;">
     <div class="card-body p-4 p-md-5">
         <form action="<?= $formAction; ?>" method="post" enctype="multipart/form-data">
+<?= csrf_field() ?>
             <div class="row g-4">
                 <!-- Pilihan Tab / Kategori Utama -->
                 <div class="col-md-6">

@@ -66,11 +66,14 @@ class Sbu extends BaseController
              // Actually, wait, let's just use company_id. 
         }
 
-        // Ambil semua proyek untuk dimasukkan ke view
-        $allProjects = $this->sbuProjectModel->findAll();
+        // Ambil hanya proyek milik SBU perusahaan ini (hindari load seluruh tabel sbu_projects)
         $projectsBySbu = [];
-        foreach ($allProjects as $p) {
-            $projectsBySbu[$p['sbu_id']][] = $p;
+        $sbuIds = array_values(array_filter(array_map(static fn ($row) => (int) ($row['id'] ?? 0), $sbus)));
+        if (!empty($sbuIds)) {
+            $companyProjects = $this->sbuProjectModel->whereIn('sbu_id', $sbuIds)->findAll();
+            foreach ($companyProjects as $p) {
+                $projectsBySbu[$p['sbu_id']][] = $p;
+            }
         }
 
         $data = [

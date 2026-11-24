@@ -77,6 +77,7 @@
                         <td class="text-center py-2">
                             <div class="d-flex justify-content-center gap-2">
                                 <form action="/mitra/approve/<?= $pm['id']; ?>" method="post" class="d-inline">
+<?= csrf_field() ?>
                                     <input type="hidden" name="expired_at" value="<?= esc($pm['expired_at'] ?? ''); ?>">
                                     <button type="submit" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold">
                                         <i class="bi bi-check-circle me-1"></i> Setujui
@@ -187,6 +188,7 @@
                         <div class="d-flex justify-content-center gap-1 flex-wrap">
                             <?php if(session()->get('role') === 'admin' && $status !== 'active'): ?>
                                 <form action="/mitra/approve/<?= $m['id']; ?>" method="post" class="d-inline">
+<?= csrf_field() ?>
                                     <input type="hidden" name="expired_at" value="<?= esc($expiredAt ?? ''); ?>">
                                     <button type="submit" class="btn btn-sm btn-success px-3 rounded-pill fw-semibold" title="Setujui & Aktifkan Mitra">
                                         <i class="bi bi-check-lg"></i> Setujui
@@ -238,6 +240,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form id="rejectMitraForm" action="" method="post">
+<?= csrf_field() ?>
                 <div class="modal-body p-4">
                     <p class="mb-3 text-dark">
                         Anda akan menolak pengajuan kemitraan dari <strong id="rejectMitraName">-</strong>.

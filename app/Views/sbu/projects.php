@@ -132,6 +132,7 @@
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="/sbu/storeProject/<?= $sbu['id']; ?>" method="post">
+<?= csrf_field() ?>
                 <div class="modal-body text-start">
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Nama Pekerjaan</label>
@@ -169,6 +170,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/sbu/updateProject/<?= $p['id']; ?>" method="post">
+<?= csrf_field() ?>
                     <div class="modal-body text-start">
                         <div class="mb-3">
                             <label class="form-label fw-semibold">Nama Pekerjaan</label>

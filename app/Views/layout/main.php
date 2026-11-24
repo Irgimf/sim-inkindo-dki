@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token-name" content="<?= esc(csrf_token()); ?>">
+    <meta name="csrf-token-value" content="<?= esc(csrf_hash()); ?>">
     <title><?= !empty($title) ? esc($title) . ' - SIM-INKINDO DKI' : 'SIM-INKINDO DKI - Sistem Informasi & Manajemen INKINDO DKI' ?></title>
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -795,6 +797,50 @@
                     setSidebarOpen(false);
                 }
             });
+
+            // CSRF helper: pastikan setiap form POST punya token CSRF & ubah link aksi hapus/toggle/reset ke POST
+            var csrfMetaName = document.querySelector('meta[name="csrf-token-name"]');
+            var csrfMetaValue = document.querySelector('meta[name="csrf-token-value"]');
+            var csrfName = csrfMetaName ? csrfMetaName.getAttribute('content') : '';
+            var csrfValue = csrfMetaValue ? csrfMetaValue.getAttribute('content') : '';
+
+            if (csrfName && csrfValue) {
+                document.querySelectorAll('form').forEach(function (form) {
+                    if ((form.getAttribute('method') || '').toLowerCase() === 'post') {
+                        if (!form.querySelector('input[name="' + csrfName + '"]')) {
+                            var inp = document.createElement('input');
+                            inp.type = 'hidden';
+                            inp.name = csrfName;
+                            inp.value = csrfValue;
+                            form.appendChild(inp);
+                        }
+                    }
+                });
+
+                var postActionPattern = /\/(delete|deleteProject|deleteProduct|deleteMessage|deleteKonsultasiMessage|toggle|reset)\/\d+(?:\?.*)?$/i;
+                document.addEventListener('click', function (e) {
+                    if (e.defaultPrevented) return;
+                    var link = e.target.closest('a[href]');
+                    if (!link) return;
+                    var href = link.getAttribute('href') || '';
+                    if (!postActionPattern.test(href)) return;
+
+                    e.preventDefault();
+                    var postForm = document.createElement('form');
+                    postForm.method = 'POST';
+                    postForm.action = href;
+                    postForm.style.display = 'none';
+
+                    var tokenInput = document.createElement('input');
+                    tokenInput.type = 'hidden';
+                    tokenInput.name = csrfName;
+                    tokenInput.value = csrfValue;
+                    postForm.appendChild(tokenInput);
+
+                    document.body.appendChild(postForm);
+                    postForm.submit();
+                });
+            }
         });
     </script>
     <?php if (session()->get('logged_in')): ?>

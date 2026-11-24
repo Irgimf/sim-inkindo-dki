@@ -6,6 +6,7 @@
         <div class="card card-custom p-4">
             <h4 class="mb-4 fw-bold" style="color: var(--inkindo-blue);"><?= $title; ?></h4>
             <form action="/sbu/update/<?= $sbu['id']; ?>" method="post">
+<?= csrf_field() ?>
                 
                 <?php if(session()->get('role') === 'admin'): ?>
                 <div class="mb-3 row">

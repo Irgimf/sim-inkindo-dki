@@ -73,6 +73,7 @@
     <div class="card border-0 shadow-sm rounded-4 mb-4">
         <div class="card-body p-4">
             <form action="/cms/ketentuan-mitra/page/save" method="post">
+<?= csrf_field() ?>
                 <input type="hidden" name="section" value="<?= esc($activeTab); ?>">
                 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
                     <h6 class="fw-bold mb-0" style="color: var(--inkindo-blue);">
@@ -190,6 +191,7 @@
     <div class="modal fade" id="mkItemModal" tabindex="-1" aria-labelledby="mkItemModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <form action="/cms/ketentuan-mitra/item/save" method="post" class="modal-content border-0 shadow-lg" style="border-radius: 18px;">
+<?= csrf_field() ?>
                 <input type="hidden" name="id" id="mk_id" value="0">
                 <input type="hidden" name="jenis" id="mk_jenis" value="<?= esc($activeTab); ?>">
 
@@ -268,6 +270,7 @@
 <?php else: ?>
     <!-- TAB 3: HERO & MAKSUD TUJUAN -->
     <form action="/cms/ketentuan-mitra/page/save" method="post">
+<?= csrf_field() ?>
         <input type="hidden" name="section" value="hero">
 
         <div class="card border-0 shadow-sm rounded-4 mb-4">

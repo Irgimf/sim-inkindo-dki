@@ -51,6 +51,14 @@ class Auth extends BaseController
         $now = date('Y-m-d H:i:s');
         $expiresAt = date('Y-m-d H:i:s', time() + 120);
 
+        // Bersihkan token SSO yang sudah kedaluwarsa atau terpakai (> 1 jam) agar tabel tetap ringan
+        $db->table('sso_tokens')
+            ->groupStart()
+                ->where('expires_at <', date('Y-m-d H:i:s', time() - 3600))
+                ->orWhere('used_at IS NOT NULL', null, false)
+            ->groupEnd()
+            ->delete();
+
         $db->table('sso_tokens')->insert([
             'user_id'     => $userId,
             'token'       => hash('sha256', $plainToken),
@@ -89,6 +97,51 @@ class Auth extends BaseController
 
         $width = 148;
         $height = 44;
+
+        // Render sebagai gambar raster PNG (via GD) agar tidak mudah dibaca bot lewat XML/text parsing
+        if (function_exists('imagecreatetruecolor') && function_exists('imagepng')) {
+            $img = imagecreatetruecolor($width, $height);
+            $bg  = imagecolorallocate($img, 241, 245, 249);
+            imagefilledrectangle($img, 0, 0, $width, $height, $bg);
+
+            // Garis & titik noise acak
+            for ($i = 0; $i < 6; $i++) {
+                $lineColor = imagecolorallocate($img, random_int(120, 195), random_int(150, 215), random_int(180, 240));
+                imageline($img, random_int(0, 35), random_int(2, $height - 2), random_int($width - 35, $width), random_int(2, $height - 2), $lineColor);
+            }
+            for ($i = 0; $i < 120; $i++) {
+                $dotColor = imagecolorallocate($img, random_int(150, 220), random_int(160, 220), random_int(175, 230));
+                imagesetpixel($img, random_int(0, $width - 1), random_int(0, $height - 1), $dotColor);
+            }
+
+            $paletteRgb = [
+                [10, 100, 164],
+                [6, 66, 110],
+                [30, 64, 175],
+                [21, 128, 61],
+                [15, 23, 42],
+            ];
+            for ($i = 0; $i < 5; $i++) {
+                $rgb = $paletteRgb[random_int(0, count($paletteRgb) - 1)];
+                $col = imagecolorallocate($img, $rgb[0], $rgb[1], $rgb[2]);
+                $x   = 18 + ($i * 24) + random_int(-3, 3);
+                $y   = 12 + random_int(-4, 6);
+                imagestring($img, 5, $x, $y, $code[$i], $col);
+                // Tebalkan huruf sedikit secara manual
+                imagestring($img, 5, $x + 1, $y, $code[$i], $col);
+            }
+
+            ob_start();
+            imagepng($img);
+            $pngBinary = ob_get_clean();
+            imagedestroy($img);
+
+            return $this->response
+                ->setHeader('Content-Type', 'image/png')
+                ->setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0')
+                ->setBody((string) $pngBinary);
+        }
+
         $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="' . $width . '" height="' . $height . '" viewBox="0 0 ' . $width . ' ' . $height . '">';
         $svg .= '<rect width="100%" height="100%" rx="10" fill="#f1f5f9"/>';
 
@@ -220,11 +273,11 @@ class Auth extends BaseController
                 }
                 return redirect()->to('/dashboard');
             } else {
-                $session->setFlashdata('msg', 'Password Salah');
+                $session->setFlashdata('msg', 'Username/email atau password salah.');
                 return redirect()->to('/auth/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
             }
         } else {
-            $session->setFlashdata('msg', 'Username tidak ditemukan');
+            $session->setFlashdata('msg', 'Username/email atau password salah.');
             return redirect()->to('/auth/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
         }
     }
@@ -257,7 +310,7 @@ class Auth extends BaseController
 
         $rules = [
             'email'        => 'required|valid_email|max_length[150]|is_unique[users.email]|is_unique[users.username]',
-            'password'     => 'required|min_length[6]',
+            'password'     => 'required|min_length[8]|max_length[100]',
             'confpassword' => 'matches[password]',
         ];
 
@@ -367,11 +420,11 @@ class Auth extends BaseController
 
                 return redirect()->to('/mitra');
             } else {
-                $session->setFlashdata('msg', 'Password Salah');
+                $session->setFlashdata('msg', 'Username/email atau password salah.');
                 return redirect()->to('/mitra/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
             }
         } else {
-            $session->setFlashdata('msg', 'Username Mitra Kerja tidak ditemukan');
+            $session->setFlashdata('msg', 'Username/email atau password salah.');
             return redirect()->to('/mitra/login' . ($next !== '' ? '?next=' . urlencode($next) : ''));
         }
     }
@@ -404,7 +457,7 @@ class Auth extends BaseController
 
         $rules = [
             'email'        => 'required|valid_email|max_length[150]|is_unique[users.email]|is_unique[users.username]',
-            'password'     => 'required|min_length[6]',
+            'password'     => 'required|min_length[8]|max_length[100]',
             'confpassword' => 'matches[password]',
         ];
 

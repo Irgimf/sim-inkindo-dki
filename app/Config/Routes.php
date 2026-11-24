@@ -32,7 +32,7 @@ $routes->group('perusahaan', ['filter' => 'role:admin,user'], static function ($
     $routes->post('store', 'Perusahaan::store');
     $routes->get('edit/(:num)', 'Perusahaan::edit/$1');
     $routes->post('update/(:num)', 'Perusahaan::update/$1');
-    $routes->get('delete/(:num)', 'Perusahaan::delete/$1');
+    $routes->post('delete/(:num)', 'Perusahaan::delete/$1');
 });
 
 // SBU Routes
@@ -43,13 +43,13 @@ $routes->group('sbu', ['filter' => 'role:admin,user'], static function ($routes)
     $routes->post('store', 'Sbu::store');
     $routes->get('edit/(:num)', 'Sbu::edit/$1');
     $routes->post('update/(:num)', 'Sbu::update/$1');
-    $routes->get('delete/(:num)', 'Sbu::delete/$1');
+    $routes->post('delete/(:num)', 'Sbu::delete/$1');
 
     // Projects (Pekerjaan)
     $routes->get('projects/(:num)', 'Sbu::projects/$1');
     $routes->post('storeProject/(:num)', 'Sbu::storeProject/$1');
     $routes->post('updateProject/(:num)', 'Sbu::updateProject/$1');
-    $routes->get('deleteProject/(:num)', 'Sbu::deleteProject/$1');
+    $routes->post('deleteProject/(:num)', 'Sbu::deleteProject/$1');
 });
 
 // Mitra Kerja Management Routes
@@ -60,7 +60,7 @@ $routes->group('mitra', ['filter' => 'role:admin,mitra'], static function ($rout
     $routes->post('store', 'Mitra::store');
     $routes->get('edit/(:num)', 'Mitra::edit/$1');
     $routes->post('update/(:num)', 'Mitra::update/$1');
-    $routes->get('delete/(:num)', 'Mitra::delete/$1');
+    $routes->post('delete/(:num)', 'Mitra::delete/$1');
 
     // Persetujuan Pengajuan Mitra Kerja (Admin only)
     $routes->post('approve/(:num)', 'Mitra::approve/$1', ['filter' => 'role:admin']);
@@ -70,14 +70,14 @@ $routes->group('mitra', ['filter' => 'role:admin,mitra'], static function ($rout
     $routes->get('products/(:num)', 'Mitra::products/$1');
     $routes->post('storeProduct/(:num)', 'Mitra::storeProduct/$1');
     $routes->post('updateProduct/(:num)', 'Mitra::updateProduct/$1');
-    $routes->get('deleteProduct/(:num)', 'Mitra::deleteProduct/$1');
+    $routes->post('deleteProduct/(:num)', 'Mitra::deleteProduct/$1');
 
     // Pesan Masuk Mitra Kerja & Konsultasi
     $routes->get('messages', 'Mitra::messages');
     $routes->post('markMessageRead/(:num)', 'Mitra::markMessageRead/$1');
-    $routes->get('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
+    $routes->post('deleteMessage/(:num)', 'Mitra::deleteMessage/$1');
     $routes->post('markKonsultasiRead/(:num)', 'Mitra::markKonsultasiRead/$1');
-    $routes->get('deleteKonsultasiMessage/(:num)', 'Mitra::deleteKonsultasiMessage/$1');
+    $routes->post('deleteKonsultasiMessage/(:num)', 'Mitra::deleteKonsultasiMessage/$1');
 });
 
 // Admin CMS Berita & Informasi & Halaman Utama Routes
@@ -87,44 +87,44 @@ $routes->group('cms', ['filter' => 'role:admin'], static function ($routes) {
     $routes->post('updateHomepageSlots', 'Cms::updateHomepageSlots');
     $routes->post('updatePublikasiSlots', 'Cms::updatePublikasiSlots');
     $routes->post('banner/save', 'Cms::saveHeroBanner');
-    $routes->get('banner/delete/(:num)', 'Cms::deleteHeroBanner/$1');
-    $routes->get('banner/toggle/(:num)', 'Cms::toggleHeroBanner/$1');
+    $routes->post('banner/delete/(:num)', 'Cms::deleteHeroBanner/$1');
+    $routes->post('banner/toggle/(:num)', 'Cms::toggleHeroBanner/$1');
     $routes->post('phrase/save', 'Cms::saveHeroPhrase');
-    $routes->get('phrase/delete/(:num)', 'Cms::deleteHeroPhrase/$1');
-    $routes->get('phrase/toggle/(:num)', 'Cms::toggleHeroPhrase/$1');
+    $routes->post('phrase/delete/(:num)', 'Cms::deleteHeroPhrase/$1');
+    $routes->post('phrase/toggle/(:num)', 'Cms::toggleHeroPhrase/$1');
     $routes->post('background/save', 'Cms::saveHeroBackground');
-    $routes->get('background/delete/(:num)', 'Cms::deleteHeroBackground/$1');
-    $routes->get('background/toggle/(:num)', 'Cms::toggleHeroBackground/$1');
+    $routes->post('background/delete/(:num)', 'Cms::deleteHeroBackground/$1');
+    $routes->post('background/toggle/(:num)', 'Cms::toggleHeroBackground/$1');
     $routes->get('webAsset/(:any)', 'Cms::webAsset/$1');
     $routes->get('tentang', 'CmsTentang::index');
     $routes->post('tentang/profile/save', 'CmsTentang::saveProfile');
     $routes->post('tentang/unit/save', 'CmsTentang::saveUnit');
     $routes->post('tentang/group/save', 'CmsTentang::saveGroup');
-    $routes->get('tentang/group/delete/(:num)', 'CmsTentang::deleteGroup/$1');
+    $routes->post('tentang/group/delete/(:num)', 'CmsTentang::deleteGroup/$1');
     $routes->post('tentang/member/add', 'CmsTentang::addMember');
     $routes->post('tentang/member/updateTable', 'CmsTentang::updateMembersTable');
-    $routes->get('tentang/member/delete/(:num)', 'CmsTentang::deleteMember/$1');
+    $routes->post('tentang/member/delete/(:num)', 'CmsTentang::deleteMember/$1');
     $routes->get('regulasi', 'CmsRegulasi::index');
     $routes->post('regulasi/save', 'CmsRegulasi::save');
-    $routes->get('regulasi/delete/(:num)', 'CmsRegulasi::delete/$1');
+    $routes->post('regulasi/delete/(:num)', 'CmsRegulasi::delete/$1');
     $routes->get('lelang', 'CmsLelang::index');
     $routes->post('lelang/portal/save', 'CmsLelang::savePortal');
-    $routes->get('lelang/portal/delete/(:num)', 'CmsLelang::deletePortal/$1');
+    $routes->post('lelang/portal/delete/(:num)', 'CmsLelang::deletePortal/$1');
     $routes->post('lelang/peluang/save', 'CmsLelang::savePeluang');
     $routes->get('ketentuan-mitra', 'CmsKetentuanMitra::index');
     $routes->post('ketentuan-mitra/page/save', 'CmsKetentuanMitra::savePage');
     $routes->post('ketentuan-mitra/item/save', 'CmsKetentuanMitra::saveItem');
-    $routes->get('ketentuan-mitra/item/delete/(:num)', 'CmsKetentuanMitra::deleteItem/$1');
+    $routes->post('ketentuan-mitra/item/delete/(:num)', 'CmsKetentuanMitra::deleteItem/$1');
     $routes->get('backgrounds', 'CmsBackground::index');
     $routes->post('backgrounds/save', 'CmsBackground::save');
-    $routes->get('backgrounds/reset/(:num)', 'CmsBackground::reset/$1');
+    $routes->post('backgrounds/reset/(:num)', 'CmsBackground::reset/$1');
     $routes->get('footer-contact', 'CmsFooterContact::index');
     $routes->post('footer-contact/save', 'CmsFooterContact::save');
     $routes->get('create', 'Cms::create');
     $routes->post('store', 'Cms::store');
     $routes->get('edit/(:num)', 'Cms::edit/$1');
     $routes->post('update/(:num)', 'Cms::update/$1');
-    $routes->get('delete/(:num)', 'Cms::delete/$1');
+    $routes->post('delete/(:num)', 'Cms::delete/$1');
 });
 
 // Profile Routes (Anggota & Mitra Kerja)
@@ -140,7 +140,7 @@ $routes->group('users', ['filter' => 'role:admin'], static function ($routes) {
     $routes->get('/', 'Users::index');
     $routes->post('store', 'Users::store');
     $routes->post('updateRole/(:num)', 'Users::updateRole/$1');
-    $routes->get('delete/(:num)', 'Users::delete/$1');
+    $routes->post('delete/(:num)', 'Users::delete/$1');
 });
 
 // Pencarian Routes

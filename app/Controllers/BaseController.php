@@ -142,6 +142,12 @@ abstract class BaseController extends Controller
             return null;
         }
 
+        // Batas ukuran file (maks 5MB untuk gambar, maks 25MB untuk PDF)
+        $maxBytes = ($ext === 'pdf') ? (25 * 1024 * 1024) : (5 * 1024 * 1024);
+        if ((int) $file->getSize() <= 0 || (int) $file->getSize() > $maxBytes) {
+            return null;
+        }
+
         // Verifikasi MIME type asli & integritas file di sisi server
         $mime = strtolower((string) $file->getMimeType());
         if (in_array($ext, ['jpg', 'jpeg', 'png', 'webp', 'gif'], true)) {

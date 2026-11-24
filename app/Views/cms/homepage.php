@@ -420,6 +420,7 @@
         </div>
 
         <form action="/cms/updateHomepageSlots" method="post">
+<?= csrf_field() ?>
             <div class="row g-3 align-items-stretch">
                 <!-- Slot 1: Kiri Besar -->
                 <div class="col-lg-4">
@@ -515,6 +516,7 @@
         </div>
 
         <form action="/cms/updatePublikasiSlots" method="post">
+<?= csrf_field() ?>
             <div class="row g-3 align-items-stretch">
                 <?php for ($p = 1; $p <= 8; $p++): ?>
                     <?php
@@ -571,6 +573,7 @@
 <div class="modal fade" id="phraseModal" tabindex="-1" aria-labelledby="phraseModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form action="/cms/phrase/save" method="post" class="modal-content border-0 shadow-lg modal-scrollable-form" style="border-radius: 16px;">
+<?= csrf_field() ?>
             <div class="modal-header border-bottom px-4 py-3" style="background: #f8fafc;">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="phraseModalLabel">
@@ -614,6 +617,7 @@
 <div class="modal fade" id="bannerModal" tabindex="-1" aria-labelledby="bannerModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-centered">
         <form action="/cms/banner/save" method="post" enctype="multipart/form-data" id="bannerForm" class="modal-content border-0 shadow-lg modal-scrollable-form" style="border-radius: 16px;">
+<?= csrf_field() ?>
             <div class="modal-header border-bottom px-4 py-3" style="background: #f8fafc;">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="bannerModalLabel">
@@ -860,6 +864,7 @@
 <div class="modal fade" id="bgModal" tabindex="-1" aria-labelledby="bgModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <form action="/cms/background/save" method="post" enctype="multipart/form-data" id="bgForm" class="modal-content border-0 shadow-lg modal-scrollable-form" style="border-radius: 16px;">
+<?= csrf_field() ?>
             <div class="modal-header border-bottom px-4 py-3" style="background: #f8fafc;">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="bgModalLabel">

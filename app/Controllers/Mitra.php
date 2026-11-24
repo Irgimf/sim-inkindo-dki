@@ -23,29 +23,8 @@ class Mitra extends BaseController
 
     private function handleUpload(string $fieldName, string $subFolder = 'mitra_logos'): ?string
     {
-        $file = $this->request->getFile($fieldName);
-        if (!$file || !$file->isValid() || $file->hasMoved()) {
-            return null;
-        }
-
-        $ext = strtolower($file->getExtension() ?: pathinfo($file->getClientName(), PATHINFO_EXTENSION));
-        $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'svg'];
-        if (!in_array($ext, $allowed, true)) {
-            return null;
-        }
-
-        $destDir = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $subFolder);
-        if (!is_dir($destDir)) {
-            mkdir($destDir, 0777, true);
-        }
-
-        $newName = 'mitra_' . time() . '_' . bin2hex(random_bytes(4)) . '.' . $ext;
-        $file->move($destDir, $newName);
-
-        $relativePath = trim($subFolder, '/') . '/' . $newName;
-        $this->syncFileToInkindoWeb($relativePath);
-
-        return $relativePath;
+        // Tolak SVG (cegah Stored XSS), validasi MIME, dimensi gambar, ukuran file, dan optimasi ke WebP
+        return $this->handleSingleUpload($fieldName, ['jpg', 'jpeg', 'png', 'webp', 'gif'], $subFolder, 'mitra_');
     }
 
     public function index()

@@ -98,6 +98,7 @@
                                     </div>
 
                                     <form action="/cms/backgrounds/save" method="post" enctype="multipart/form-data">
+<?= csrf_field() ?>
                                         <input type="hidden" name="id" value="<?= (int) $item['id']; ?>">
                                         <div class="mb-2">
                                             <input type="file"

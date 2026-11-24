@@ -50,6 +50,7 @@
                 </div>
 
                 <form action="/profile/update" method="post">
+<?= csrf_field() ?>
                     <div class="mb-3">
                         <label class="form-label fw-semibold small text-muted">Username</label>
                         <input type="text" class="form-control bg-light" value="<?= esc((string) ($user['username'] ?? '')); ?>" readonly>
@@ -89,6 +90,7 @@
                 </div>
 
                 <form action="/profile/password" method="post">
+<?= csrf_field() ?>
                     <div class="mb-3">
                         <label for="current_password" class="form-label fw-semibold small">Password Lama <span class="text-danger">*</span></label>
                         <input type="password" id="current_password" name="current_password" class="form-control" placeholder="Masukkan password saat ini" required>
@@ -147,6 +149,7 @@
                 <div class="d-flex justify-content-center gap-2">
                     <button type="button" class="btn btn-light border rounded-pill px-4 py-2 fw-semibold" data-bs-dismiss="modal">Batal</button>
                     <form action="/profile/delete" method="post" class="m-0">
+<?= csrf_field() ?>
                         <button type="submit" class="btn btn-danger rounded-pill px-4 py-2 fw-semibold">
                             <i class="bi bi-trash3 me-1"></i> Ya, Hapus Akun
                         </button>

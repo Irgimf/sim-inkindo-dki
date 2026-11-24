@@ -215,6 +215,7 @@
 <?php if ($activeTab === 'profil'): ?>
 <!-- ================= TAB 1: PROFIL ORGANISASI ================= -->
 <form action="/cms/tentang/profile/save" method="post" enctype="multipart/form-data">
+<?= csrf_field() ?>
     <!-- 1. Hero Banner -->
     <div class="card border-0 shadow-sm mb-4" style="border-radius: 16px; border-left: 5px solid var(--inkindo-blue) !important;">
         <div class="card-body p-4">
@@ -469,6 +470,7 @@
 
         <div class="collapse mt-3 pt-3 border-top" id="editUnitHeaderCollapse">
             <form action="/cms/tentang/unit/save" method="post" class="row g-3">
+<?= csrf_field() ?>
                 <input type="hidden" name="unit_id" value="<?= (int) ($currentUnitObj['id'] ?? 0); ?>">
                 <input type="hidden" name="slug" value="<?= esc($activeUnit); ?>">
                 <div class="col-md-4">
@@ -616,6 +618,7 @@
             </div>
 
             <form action="/cms/tentang/member/updateTable" method="post" id="crudMembersForm">
+<?= csrf_field() ?>
                 <input type="hidden" name="unit_slug" value="<?= esc($activeUnit); ?>">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0" style="min-width: 860px;">
@@ -719,6 +722,7 @@
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form action="/cms/tentang/member/add" method="post" class="modal-content border-0 shadow-lg modal-scrollable-form" style="border-radius: 16px;">
+<?= csrf_field() ?>
             <div class="modal-header border-bottom px-4 py-3" style="background: #f8fafc;">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="addMemberModalLabel">
@@ -794,6 +798,7 @@
 <div class="modal fade" id="groupModal" tabindex="-1" aria-labelledby="groupModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form action="/cms/tentang/group/save" method="post" class="modal-content border-0 shadow-lg modal-scrollable-form" style="border-radius: 16px;">
+<?= csrf_field() ?>
             <div class="modal-header border-bottom px-4 py-3" style="background: #f8fafc;">
                 <div>
                     <h5 class="modal-title fw-bold text-dark mb-0" id="groupModalLabel">

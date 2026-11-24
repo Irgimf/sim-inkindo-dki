@@ -6,6 +6,7 @@
         <div class="card card-custom p-4">
             <h4 class="mb-4 fw-bold" style="color: var(--inkindo-blue);"><?= $title; ?></h4>
             <form action="/perusahaan/update/<?= $company['id']; ?>" method="post">
+<?= csrf_field() ?>
                 <div class="mb-3 row">
                     <label class="col-sm-3 col-form-label fw-semibold">Nama PT</label>
                     <div class="col-sm-9">

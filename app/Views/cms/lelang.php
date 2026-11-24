@@ -134,6 +134,7 @@
     <div class="modal fade" id="portalModal" tabindex="-1" aria-labelledby="portalModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <form action="/cms/lelang/portal/save" method="post" class="modal-content border-0 shadow-lg" style="border-radius: 18px;">
+<?= csrf_field() ?>
                 <input type="hidden" name="id" id="portal_id" value="0">
 
                 <div class="modal-header border-0 pb-0 pt-4 px-4">
@@ -225,6 +226,7 @@
 <?php else: ?>
     <!-- TAB 2: PELUANG USAHA LAINNYA & HERO -->
     <form action="/cms/lelang/peluang/save" method="post">
+<?= csrf_field() ?>
         <div class="card border-0 shadow-sm rounded-4 mb-4">
             <div class="card-body p-4">
                 <h5 class="fw-bold mb-3" style="color: var(--inkindo-blue);">1. Header Halaman (Hero Section)</h5>

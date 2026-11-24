@@ -125,6 +125,7 @@
         <div class="card-body bg-light rounded mt-2 mx-3 mb-3 border">
             <h5 class="fw-bold mb-3">Formulir SBU Baru</h5>
             <form action="/sbu/store" method="post">
+<?= csrf_field() ?>
                 <input type="hidden" name="company_id" value="<?= $companyId; ?>">
 
                 <?php if ($isBothJkNjk): ?>
@@ -367,6 +368,7 @@
                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/sbu/update/<?= $s['id']; ?>" method="post">
+<?= csrf_field() ?>
                     <div class="modal-body text-start">
                         <?php if ($isBothJkNjk): ?>
                             <div class="mb-3">

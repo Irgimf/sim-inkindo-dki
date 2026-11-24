@@ -63,6 +63,7 @@
                     <?php endif; ?>
 
                     <form action="/mitra/store" method="post" enctype="multipart/form-data">
+<?= csrf_field() ?>
                         <div class="row g-3">
                             <div class="col-md-12 mb-2">
                                 <label class="form-label fw-semibold">Upload Gambar Logo Perusahaan Mitra <span class="text-danger">*</span></label>

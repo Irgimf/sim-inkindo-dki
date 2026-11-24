@@ -116,7 +116,7 @@ class Profile extends BaseController
 
         $rules = [
             'current_password' => 'required',
-            'new_password'     => 'required|min_length[6]|max_length[100]',
+            'new_password'     => 'required|min_length[8]|max_length[100]',
             'confirm_password' => 'required|matches[new_password]',
         ];
 
