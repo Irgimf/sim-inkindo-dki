@@ -110,8 +110,9 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label class="form-label fw-semibold">Email Resmi</label>
-                                <input type="email" class="form-control" name="email" value="<?= esc((string) ($userEmail ?? '')) ?>" placeholder="Contoh: info@perusahaan.co.id">
+                                <label class="form-label fw-semibold">Email Resmi Perusahaan</label>
+                                <input type="email" class="form-control" name="email" placeholder="Contoh: info@perusahaan.co.id">
+                                <div class="form-text">Ditampilkan di halaman web publik &amp; bisa diubah kapan saja (terpisah dari email login).</div>
                             </div>
 
                             <div class="col-md-4">

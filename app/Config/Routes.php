@@ -10,6 +10,11 @@ $routes->get('/auth/login', 'Auth::login');
 $routes->post('/auth/processLogin', 'Auth::processLogin');
 $routes->get('/auth/register', 'Auth::register');
 $routes->post('/auth/processRegister', 'Auth::processRegister');
+$routes->post('/auth/register/send-otp', 'Auth::sendRegisterOtp');
+$routes->post('/auth/register/verify-otp', 'Auth::verifyRegisterOtp');
+$routes->post('/auth/forgot/send-otp', 'Auth::sendForgotOtp');
+$routes->post('/auth/forgot/verify-otp', 'Auth::verifyForgotOtp');
+$routes->post('/auth/forgot/reset-password', 'Auth::resetForgotPassword');
 $routes->get('/auth/logout', 'Auth::logout');
 $routes->get('/auth/captcha', 'Auth::captcha');
 $routes->get('/auth/sso', 'Auth::sso');
@@ -129,6 +134,7 @@ $routes->group('cms', ['filter' => 'role:admin'], static function ($routes) {
 $routes->group('profile', ['filter' => 'role:user,mitra'], static function ($routes) {
     $routes->get('/', 'Profile::index');
     $routes->post('update', 'Profile::update');
+    $routes->post('password/send-otp', 'Profile::sendPasswordOtp');
     $routes->post('password', 'Profile::updatePassword');
     $routes->post('delete', 'Profile::deleteAccount');
 });

@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token-name" content="<?= esc(csrf_token()) ?>">
+    <meta name="csrf-token-value" content="<?= esc(csrf_hash()) ?>">
     <title>Login - SIM-INKINDO DKI (Sistem Informasi & Manajemen INKINDO DKI)</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -38,9 +40,9 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow: hidden;
-            width: 850px;
+            width: 900px;
             max-width: 95%;
-            min-height: 560px;
+            min-height: 600px;
         }
 
         .auth-captcha-row {
@@ -105,11 +107,11 @@
         }
 
         .auth-brand-logo {
-            height: 88px;
+            height: 76px;
             width: auto;
-            max-width: 240px;
+            max-width: 220px;
             object-fit: contain;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: block;
         }
 
@@ -547,25 +549,23 @@
                 box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
                 margin: 7px 0;
             }
-            .auth-input-group input {
+            .auth-input-group input,
+            .auth-wrapper .sign-up .auth-input-group input {
                 border-radius: 16px;
                 padding: 14px 42px;
                 background: transparent;
                 border: none;
-            }
-            .auth-wrapper .sign-up input {
-                background: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 16px;
-                padding: 14px 16px;
-                box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
-                margin: 7px 0;
+                box-shadow: none;
+                margin: 0;
+                font-size: 16px;
             }
             .auth-options-row {
                 margin: 12px 2px 6px;
                 background: transparent;
             }
-            .auth-wrapper button[type="submit"] {
+            .auth-wrapper button[type="submit"],
+            .auth-wrapper #regSendOtpBtn,
+            .auth-wrapper #regVerifyOtpBtn {
                 width: 100%;
                 border-radius: 16px;
                 padding: 14px 20px;
@@ -641,10 +641,10 @@
     <div class="auth-wrapper <?= (isset($is_register) && $is_register) ? 'active' : '' ?>" id="authWrapper">
         <!-- Sign Up Form (2 Konsep Register Anggota) -->
         <!-- 1. KONSEP SEMENTARA (Belum ada akses database KTA Online) - AKTIF -->
-        <?php /* <?= view('auth/partials/register_anggota_manual', get_defined_vars()) ?> */ ?>
+        <?= view('auth/partials/register_anggota_manual', get_defined_vars()) ?>
 
         <!-- 2. KONSEP INTEGRASI KTA ONLINE (Hapus comment di bawah dan comment konsep 1 di atas jika sudah ada akses database KTA Online) -->
-        <?= view('auth/partials/register_anggota_kta_online', get_defined_vars()) ?>
+        <?php /* <?= view('auth/partials/register_anggota_kta_online', get_defined_vars()) ?> */ ?>
 
         <!-- Sign In Form -->
         <div class="form-container sign-in">
@@ -732,15 +732,7 @@
         </div>
     </div>
 
-    <div class="auth-forgot-modal-backdrop" id="forgotModal">
-        <div class="auth-forgot-modal-card">
-            <h3 style="color: var(--inkindo-blue); margin-bottom: 8px; font-size: 19px;">Lupa Password?</h3>
-            <p style="font-size: 13.5px; color: #475569; line-height: 1.6; margin-bottom: 18px;">
-                Untuk keamanan akun anggota, silakan hubungi Admin Sekretariat DPP INKINDO DKI Jakarta di <strong>+62217942940</strong> atau email <strong>sekretariat@inkindo-dki.org</strong> untuk reset password.
-            </p>
-            <button type="button" onclick="closeForgotModal()" style="background: var(--inkindo-blue); color: #fff; border: none; border-radius: 12px; padding: 10px 24px; font-weight: 600; cursor: pointer;">Mengerti</button>
-        </div>
-    </div>
+    <?= view('auth/partials/forgot_password_modal', ['portal' => 'anggota']) ?>
 
     <script>
         let pendingAuthForm = null;
@@ -901,5 +893,6 @@
         if (loginBtn) loginBtn.addEventListener('click', showLogin);
         if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', showLogin);
     </script>
+    <?= view('auth/partials/otp_auth_scripts', ['portal' => 'anggota']) ?>
 </body>
 </html>

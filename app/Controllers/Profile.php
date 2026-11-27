@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\EmailOtpService;
 use App\Models\CompanyModel;
 use App\Models\MitraKerjaModel;
 use App\Models\SbuModel;
@@ -49,8 +50,9 @@ class Profile extends BaseController
         }
 
         return view('profile/index', [
-            'title' => 'Profil Akun',
-            'user'  => $user,
+            'title'       => 'Profil Akun',
+            'user'        => $user,
+            'maskedEmail' => EmailOtpService::maskEmail((string) ($user['email'] ?? $user['username'] ?? '')),
         ]);
     }
 
@@ -69,36 +71,58 @@ class Profile extends BaseController
         }
 
         $rules = [
-            'email' => 'required|valid_email|max_length[150]',
-            'name'  => 'permit_empty|max_length[150]',
+            'name' => 'permit_empty|max_length[150]',
         ];
 
         if (! $this->validate($rules)) {
             return redirect()->to('/profile')->with('error', implode(' ', $this->validator->getErrors()));
         }
 
-        $email = trim((string) $this->request->getPost('email'));
+        $existingEmail = trim((string) ($user['email'] ?? $user['username'] ?? ''));
         $nameInput = trim((string) $this->request->getPost('name'));
 
-        // Cek apakah email sudah dipakai akun lain
-        $duplicate = $this->userModel
-            ->where('email', $email)
-            ->where('id !=', $userId)
-            ->first();
-        if ($duplicate) {
-            return redirect()->to('/profile')->with('error', 'Email tersebut sudah digunakan oleh akun lain.');
-        }
-
-        // Jika nama user dikosongkan, default menggunakan email
-        $finalName = $nameInput !== '' ? $nameInput : $email;
+        // Email bersifat permanen (tidak diubah). Jika nama dikosongkan, default menggunakan email.
+        $finalName = $nameInput !== '' ? $nameInput : $existingEmail;
 
         $this->userModel->update($userId, [
-            'name'  => $finalName,
-            'email' => $email,
+            'name' => $finalName,
         ]);
 
         session()->setFlashdata('pesan', 'Informasi profil berhasil diperbarui.');
         return redirect()->to('/profile');
+    }
+
+    public function sendPasswordOtp()
+    {
+        $role = (string) session()->get('role');
+        if (! in_array($role, ['user', 'mitra'], true)) {
+            return $this->response->setStatusCode(403)->setJSON(['ok' => false, 'message' => 'Akses ditolak.']);
+        }
+
+        $userId = (int) session()->get('id');
+        $user = $this->userModel->find($userId);
+        if (! $user) {
+            return $this->response->setStatusCode(401)->setJSON(['ok' => false, 'message' => 'Sesi tidak valid.']);
+        }
+
+        $targetEmail = strtolower(trim((string) ($user['email'] ?? '')));
+        if ($targetEmail === '' && filter_var((string) ($user['username'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+            $targetEmail = strtolower(trim((string) $user['username']));
+        }
+
+        if ($targetEmail === '' || ! filter_var($targetEmail, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Harap lengkapi alamat email aktif pada Informasi Profil terlebih dahulu sebelum mengubah password.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $otpService = new EmailOtpService();
+        $result = $otpService->sendOtp($targetEmail, 'change_password', (string) $this->request->getIPAddress(), 'Kode OTP Ubah Password');
+        $result['csrf_hash'] = csrf_hash();
+
+        return $this->response->setStatusCode($result['ok'] ? 200 : 429)->setJSON($result);
     }
 
     public function updatePassword()
@@ -118,6 +142,7 @@ class Profile extends BaseController
             'current_password' => 'required',
             'new_password'     => 'required|min_length[8]|max_length[100]',
             'confirm_password' => 'required|matches[new_password]',
+            'otp_code'         => 'required|exact_length[6]|numeric',
         ];
 
         if (! $this->validate($rules)) {
@@ -126,16 +151,28 @@ class Profile extends BaseController
 
         $currentPassword = (string) $this->request->getPost('current_password');
         $newPassword     = (string) $this->request->getPost('new_password');
+        $otpCode         = trim((string) $this->request->getPost('otp_code'));
 
         if (! password_verify($currentPassword, (string) $user['password'])) {
             return redirect()->to('/profile')->with('error', 'Password lama yang Anda masukkan salah.');
+        }
+
+        $targetEmail = strtolower(trim((string) ($user['email'] ?? '')));
+        if ($targetEmail === '' && filter_var((string) ($user['username'] ?? ''), FILTER_VALIDATE_EMAIL)) {
+            $targetEmail = strtolower(trim((string) $user['username']));
+        }
+
+        $otpService = new EmailOtpService();
+        $otpCheck = $otpService->verifyOtp($targetEmail, 'change_password', $otpCode);
+        if (! $otpCheck['ok']) {
+            return redirect()->to('/profile')->with('error', $otpCheck['message']);
         }
 
         $this->userModel->update($userId, [
             'password' => password_hash($newPassword, PASSWORD_DEFAULT),
         ]);
 
-        session()->setFlashdata('pesan', 'Password akun berhasil diperbarui.');
+        session()->setFlashdata('pesan', 'Password akun berhasil diperbarui setelah verifikasi OTP.');
         return redirect()->to('/profile');
     }
 

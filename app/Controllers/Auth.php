@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Controllers\BaseController;
+use App\Libraries\EmailOtpService;
 use App\Models\UserModel;
 
 class Auth extends BaseController
@@ -87,7 +88,8 @@ class Auth extends BaseController
     public function captcha()
     {
         $form = preg_replace('/[^a-z0-9_]/', '', strtolower((string) $this->request->getGet('form'))) ?: 'login';
-        $chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+        // Hindari karakter ambigu (0/O, 1/I/L, 2/Z, 5/S, 8/B) agar mudah dibaca manusia
+        $chars = 'ACDEFGHJKMNPQRTUVWXY34679';
         $code = '';
         for ($i = 0; $i < 5; $i++) {
             $code .= $chars[random_int(0, strlen($chars) - 1)];
@@ -95,22 +97,22 @@ class Auth extends BaseController
 
         session()->set('captcha_' . $form, $code);
 
-        $width = 148;
-        $height = 44;
+        $width = 160;
+        $height = 46;
 
-        // Render sebagai gambar raster PNG (via GD) agar tidak mudah dibaca bot lewat XML/text parsing
+        // Render sebagai gambar raster PNG (via GD) yang tajam & jelas dibaca manusia namun tidak bisa di-parse sebagai teks XML oleh bot
         if (function_exists('imagecreatetruecolor') && function_exists('imagepng')) {
             $img = imagecreatetruecolor($width, $height);
             $bg  = imagecolorallocate($img, 241, 245, 249);
             imagefilledrectangle($img, 0, 0, $width, $height, $bg);
 
-            // Garis & titik noise acak
-            for ($i = 0; $i < 6; $i++) {
-                $lineColor = imagecolorallocate($img, random_int(120, 195), random_int(150, 215), random_int(180, 240));
-                imageline($img, random_int(0, 35), random_int(2, $height - 2), random_int($width - 35, $width), random_int(2, $height - 2), $lineColor);
+            // Garis & titik noise halus di latar belakang
+            for ($i = 0; $i < 4; $i++) {
+                $lineColor = imagecolorallocate($img, random_int(175, 210), random_int(195, 225), random_int(215, 240));
+                imageline($img, random_int(0, 30), random_int(4, $height - 4), random_int($width - 30, $width), random_int(4, $height - 4), $lineColor);
             }
-            for ($i = 0; $i < 120; $i++) {
-                $dotColor = imagecolorallocate($img, random_int(150, 220), random_int(160, 220), random_int(175, 230));
+            for ($i = 0; $i < 60; $i++) {
+                $dotColor = imagecolorallocate($img, random_int(185, 220), random_int(195, 225), random_int(205, 235));
                 imagesetpixel($img, random_int(0, $width - 1), random_int(0, $height - 1), $dotColor);
             }
 
@@ -121,14 +123,44 @@ class Auth extends BaseController
                 [21, 128, 61],
                 [15, 23, 42],
             ];
-            for ($i = 0; $i < 5; $i++) {
-                $rgb = $paletteRgb[random_int(0, count($paletteRgb) - 1)];
-                $col = imagecolorallocate($img, $rgb[0], $rgb[1], $rgb[2]);
-                $x   = 18 + ($i * 24) + random_int(-3, 3);
-                $y   = 12 + random_int(-4, 6);
-                imagestring($img, 5, $x, $y, $code[$i], $col);
-                // Tebalkan huruf sedikit secara manual
-                imagestring($img, 5, $x + 1, $y, $code[$i], $col);
+
+            $ttfCandidates = [
+                'C:\\Windows\\Fonts\\arialbd.ttf',
+                'C:\\Windows\\Fonts\\segoeuib.ttf',
+                '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+                '/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf',
+            ];
+            $ttfFont = null;
+            foreach ($ttfCandidates as $cand) {
+                if (is_file($cand)) {
+                    $ttfFont = $cand;
+                    break;
+                }
+            }
+
+            if ($ttfFont !== null && function_exists('imagettftext')) {
+                for ($i = 0; $i < 5; $i++) {
+                    $rgb   = $paletteRgb[random_int(0, count($paletteRgb) - 1)];
+                    $col   = imagecolorallocate($img, $rgb[0], $rgb[1], $rgb[2]);
+                    $angle = random_int(-10, 10);
+                    $x     = 16 + ($i * 27) + random_int(-2, 2);
+                    $y     = 33 + random_int(-2, 2);
+                    imagettftext($img, 20, $angle, $x, $y, $col, $ttfFont, $code[$i]);
+                }
+            } else {
+                // Fallback GD bitmap diperbesar 2x agar tetap jelas dibaca
+                $smallW = 80;
+                $smallH = 23;
+                $small  = imagecreatetruecolor($smallW, $smallH);
+                $sBg    = imagecolorallocate($small, 241, 245, 249);
+                imagefilledrectangle($small, 0, 0, $smallW, $smallH, $sBg);
+                for ($i = 0; $i < 5; $i++) {
+                    $rgb = $paletteRgb[random_int(0, count($paletteRgb) - 1)];
+                    $col = imagecolorallocate($small, $rgb[0], $rgb[1], $rgb[2]);
+                    imagestring($small, 5, 7 + ($i * 14), 4 + random_int(-1, 1), $code[$i], $col);
+                }
+                imagecopyresampled($img, $small, 0, 0, 0, 0, $width, $height, $smallW, $smallH);
+                imagedestroy($small);
             }
 
             ob_start();
@@ -294,17 +326,30 @@ class Auth extends BaseController
     {
         $throttler = \Config\Services::throttler();
         $throttleKey = 'reg_' . md5((string) $this->request->getIPAddress());
-        if ($throttler->check($throttleKey, 5, MINUTE) === false) {
+        if ($throttler->check($throttleKey, 8, MINUTE) === false) {
             return view('auth/login', [
                 'is_register'   => true,
                 'registerError' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 1 menit.',
             ]);
         }
 
-        if (! $this->verifyCaptcha('register')) {
+        if (trim((string) $this->request->getPost('website_hp')) !== '') {
             return view('auth/login', [
                 'is_register'   => true,
-                'registerError' => 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.',
+                'registerError' => 'Permintaan tidak valid.',
+            ]);
+        }
+
+        $email = strtolower(trim((string) $this->request->getVar('email')));
+        $verified = session()->get('otp_reg_verified_anggota');
+        if (
+            ! is_array($verified)
+            || ($verified['email'] ?? '') !== $email
+            || (time() - (int) ($verified['verified_at'] ?? 0)) > 900
+        ) {
+            return view('auth/login', [
+                'is_register'   => true,
+                'registerError' => 'Email belum terverifikasi OTP atau sesi verifikasi telah kedaluwarsa. Silakan ulangi verifikasi OTP.',
             ]);
         }
 
@@ -316,18 +361,18 @@ class Auth extends BaseController
 
         if ($this->validate($rules)) {
             $model = new UserModel();
-            $email = strtolower(trim((string) $this->request->getVar('email')));
             $data = [
                 'username' => $email,
                 'email'    => $email,
                 'name'     => $email,
                 'role'     => 'user',
-                'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
+                'password' => password_hash((string) $this->request->getVar('password'), PASSWORD_DEFAULT),
             ];
             $model->save($data);
             $newUserId = (int) $model->getInsertID();
 
             $session = session();
+            $session->remove('otp_reg_verified_anggota');
             $session->regenerate(true);
             $session->set([
                 'id'           => $newUserId,
@@ -337,7 +382,7 @@ class Auth extends BaseController
                 'logged_in'    => true,
             ]);
 
-            return redirect()->to('/perusahaan/onboarding')->with('success', 'Akun berhasil dibuat. Silakan lengkapi data perusahaan (PT) Anda.');
+            return redirect()->to('/perusahaan/onboarding')->with('success', 'Akun berhasil dibuat & email terverifikasi. Silakan lengkapi data perusahaan (PT) Anda.');
         } else {
             $data['validation'] = $this->validator;
             $data['is_register'] = true;
@@ -441,17 +486,30 @@ class Auth extends BaseController
     {
         $throttler = \Config\Services::throttler();
         $throttleKey = 'mitra_reg_' . md5((string) $this->request->getIPAddress());
-        if ($throttler->check($throttleKey, 5, MINUTE) === false) {
+        if ($throttler->check($throttleKey, 8, MINUTE) === false) {
             return view('auth/mitra_login', [
                 'is_register'   => true,
                 'registerError' => 'Terlalu banyak percobaan pendaftaran. Silakan tunggu 1 menit.',
             ]);
         }
 
-        if (! $this->verifyCaptcha('mitra_register')) {
+        if (trim((string) $this->request->getPost('website_hp')) !== '') {
             return view('auth/mitra_login', [
                 'is_register'   => true,
-                'registerError' => 'Kode CAPTCHA tidak sesuai atau sudah kedaluwarsa. Silakan coba lagi.',
+                'registerError' => 'Permintaan tidak valid.',
+            ]);
+        }
+
+        $email = strtolower(trim((string) $this->request->getVar('email')));
+        $verified = session()->get('otp_reg_verified_mitra');
+        if (
+            ! is_array($verified)
+            || ($verified['email'] ?? '') !== $email
+            || (time() - (int) ($verified['verified_at'] ?? 0)) > 900
+        ) {
+            return view('auth/mitra_login', [
+                'is_register'   => true,
+                'registerError' => 'Email belum terverifikasi OTP atau sesi verifikasi telah kedaluwarsa. Silakan ulangi verifikasi OTP.',
             ]);
         }
 
@@ -463,18 +521,18 @@ class Auth extends BaseController
 
         if ($this->validate($rules)) {
             $model = new UserModel();
-            $email = strtolower(trim((string) $this->request->getVar('email')));
             $data = [
                 'username' => $email,
                 'email'    => $email,
                 'name'     => $email,
                 'role'     => 'mitra',
-                'password' => password_hash($this->request->getVar('password'), PASSWORD_DEFAULT),
+                'password' => password_hash((string) $this->request->getVar('password'), PASSWORD_DEFAULT),
             ];
             $model->save($data);
             $newUserId = (int) $model->getInsertID();
 
             $session = session();
+            $session->remove('otp_reg_verified_mitra');
             $session->regenerate(true);
             $session->set([
                 'id'           => $newUserId,
@@ -484,12 +542,223 @@ class Auth extends BaseController
                 'logged_in'    => true,
             ]);
 
-            return redirect()->to('/mitra/onboarding')->with('success', 'Akun Mitra Kerja berhasil dibuat. Silakan lengkapi profil perusahaan mitra Anda.');
+            return redirect()->to('/mitra/onboarding')->with('success', 'Akun Mitra Kerja berhasil dibuat & email terverifikasi. Silakan lengkapi profil perusahaan mitra Anda.');
         } else {
             $data['validation'] = $this->validator;
             $data['is_register'] = true;
             return view('auth/mitra_login', $data);
         }
+    }
+
+    // ================= EMAIL OTP: DAFTAR AKUN & LUPA PASSWORD =================
+
+    public function sendRegisterOtp()
+    {
+        if (trim((string) $this->request->getPost('website_hp')) !== '') {
+            return $this->response->setStatusCode(400)->setJSON(['ok' => false, 'message' => 'Permintaan ditolak.']);
+        }
+
+        $portal = strtolower(trim((string) $this->request->getPost('portal'))) === 'mitra' ? 'mitra' : 'anggota';
+        $email  = strtolower(trim((string) $this->request->getPost('email')));
+
+        $otpService = new EmailOtpService();
+        if (! $otpService->isValidEmailAddress($email)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Alamat email tidak valid atau domain email tidak ditemukan. Gunakan email aktif.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $userModel = new UserModel();
+        $exists = $userModel->groupStart()
+            ->where('email', $email)
+            ->orWhere('username', $email)
+            ->groupEnd()
+            ->first();
+
+        if ($exists) {
+            return $this->response->setStatusCode(409)->setJSON([
+                'ok'        => false,
+                'message'   => 'Email ini sudah terdaftar. Silakan masuk atau gunakan fitur Lupa Password.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $subject = $portal === 'mitra' ? 'Kode OTP Pendaftaran Mitra Kerja' : 'Kode OTP Pendaftaran Anggota';
+        $result = $otpService->sendOtp($email, 'register_' . $portal, (string) $this->request->getIPAddress(), $subject);
+        $result['csrf_hash'] = csrf_hash();
+
+        return $this->response->setStatusCode($result['ok'] ? 200 : 429)->setJSON($result);
+    }
+
+    public function verifyRegisterOtp()
+    {
+        $portal = strtolower(trim((string) $this->request->getPost('portal'))) === 'mitra' ? 'mitra' : 'anggota';
+        $email  = strtolower(trim((string) $this->request->getPost('email')));
+        $code   = trim((string) $this->request->getPost('otp'));
+
+        $otpService = new EmailOtpService();
+        $res = $otpService->verifyOtp($email, 'register_' . $portal, $code);
+
+        if (! $res['ok']) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => $res['message'],
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        session()->set('otp_reg_verified_' . $portal, [
+            'email'       => $email,
+            'verified_at' => time(),
+        ]);
+
+        return $this->response->setJSON([
+            'ok'        => true,
+            'email'     => $email,
+            'message'   => 'Email berhasil diverifikasi! Silakan buat password baru Anda.',
+            'csrf_hash' => csrf_hash(),
+        ]);
+    }
+
+    public function sendForgotOtp()
+    {
+        $portal = strtolower(trim((string) $this->request->getPost('portal'))) === 'mitra' ? 'mitra' : 'anggota';
+        $email  = strtolower(trim((string) $this->request->getPost('identifier')));
+
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Masukkan alamat email yang valid dan terdaftar (contoh: nama@domain.com).',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $userModel = new UserModel();
+        $user = $userModel->where('email', $email)->first();
+
+        if (! $user) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'ok'        => false,
+                'message'   => 'Alamat email tersebut tidak terdaftar di database sistem.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $role = (string) ($user['role'] ?? 'user');
+        if ($portal === 'mitra' && ! in_array($role, ['mitra', 'admin', 'super_admin'], true)) {
+            return $this->response->setStatusCode(403)->setJSON([
+                'ok'        => false,
+                'message'   => 'Email ini terdaftar sebagai akun Anggota. Silakan lakukan Lupa Password melalui Portal Anggota.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+        if ($portal === 'anggota' && $role === 'mitra') {
+            return $this->response->setStatusCode(403)->setJSON([
+                'ok'        => false,
+                'message'   => 'Email ini terdaftar sebagai akun Mitra Kerja. Silakan lakukan Lupa Password melalui Portal Mitra Kerja.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $targetEmail = strtolower(trim((string) $user['email']));
+        $otpService = new EmailOtpService();
+        $result = $otpService->sendOtp($targetEmail, 'forgot_password', (string) $this->request->getIPAddress(), 'Kode OTP Reset Password');
+        $result['csrf_hash'] = csrf_hash();
+
+        if ($result['ok']) {
+            session()->set('otp_forgot_pending', [
+                'user_id'    => (int) $user['id'],
+                'email'      => $targetEmail,
+                'portal'     => $portal,
+                'created_at' => time(),
+            ]);
+        }
+
+        return $this->response->setStatusCode($result['ok'] ? 200 : 429)->setJSON($result);
+    }
+
+    public function verifyForgotOtp()
+    {
+        $pending = session()->get('otp_forgot_pending');
+        if (! is_array($pending) || empty($pending['email']) || (time() - (int) ($pending['created_at'] ?? 0)) > 600) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Sesi reset password kedaluwarsa. Silakan kirim ulang OTP.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $code = trim((string) $this->request->getPost('otp'));
+        $otpService = new EmailOtpService();
+        $res = $otpService->verifyOtp((string) $pending['email'], 'forgot_password', $code);
+
+        if (! $res['ok']) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => $res['message'],
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        session()->remove('otp_forgot_pending');
+        session()->set('otp_forgot_verified', [
+            'user_id'     => (int) $pending['user_id'],
+            'email'       => (string) $pending['email'],
+            'verified_at' => time(),
+        ]);
+
+        return $this->response->setJSON([
+            'ok'           => true,
+            'masked_email' => EmailOtpService::maskEmail((string) $pending['email']),
+            'message'      => 'Kode OTP valid! Silakan buat password baru Anda.',
+            'csrf_hash'    => csrf_hash(),
+        ]);
+    }
+
+    public function resetForgotPassword()
+    {
+        $verified = session()->get('otp_forgot_verified');
+        if (! is_array($verified) || empty($verified['user_id']) || (time() - (int) ($verified['verified_at'] ?? 0)) > 600) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Sesi verifikasi reset password telah habis. Silakan ulangi dari awal.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $password     = (string) $this->request->getPost('password');
+        $confPassword = (string) $this->request->getPost('confpassword');
+
+        if (strlen($password) < 8 || strlen($password) > 100) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Password baru minimal 8 karakter.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        if ($password !== $confPassword) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'ok'        => false,
+                'message'   => 'Konfirmasi password tidak cocok.',
+                'csrf_hash' => csrf_hash(),
+            ]);
+        }
+
+        $userModel = new UserModel();
+        $userModel->update((int) $verified['user_id'], [
+            'password' => password_hash($password, PASSWORD_DEFAULT),
+        ]);
+
+        session()->remove('otp_forgot_verified');
+
+        return $this->response->setJSON([
+            'ok'        => true,
+            'message'   => 'Password berhasil diperbarui! Silakan login menggunakan password baru Anda.',
+            'csrf_hash' => csrf_hash(),
+        ]);
     }
 
     public function logout()

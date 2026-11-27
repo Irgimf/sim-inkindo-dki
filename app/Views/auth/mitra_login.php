@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token-name" content="<?= esc(csrf_token()) ?>">
+    <meta name="csrf-token-value" content="<?= esc(csrf_hash()) ?>">
     <title>Portal Mitra Kerja - SIM-INKINDO DKI</title>
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -53,9 +55,9 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
             position: relative;
             overflow: hidden;
-            width: 850px;
+            width: 900px;
             max-width: 95%;
-            min-height: 560px;
+            min-height: 600px;
         }
 
         .auth-captcha-row {
@@ -120,11 +122,11 @@
         }
 
         .auth-brand-logo {
-            height: 88px;
+            height: 76px;
             width: auto;
-            max-width: 240px;
+            max-width: 220px;
             object-fit: contain;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             display: block;
         }
 
@@ -537,25 +539,23 @@
                 box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
                 margin: 7px 0;
             }
-            .auth-input-group input {
+            .auth-input-group input,
+            .auth-wrapper .sign-up .auth-input-group input {
                 border-radius: 16px;
                 padding: 14px 42px;
                 background: transparent;
                 border: none;
-            }
-            .auth-wrapper .sign-up input {
-                background: #ffffff;
-                border: 1px solid #e2e8f0;
-                border-radius: 16px;
-                padding: 14px 16px;
-                box-shadow: 0 4px 14px rgba(10, 100, 164, 0.05);
-                margin: 7px 0;
+                box-shadow: none;
+                margin: 0;
+                font-size: 16px;
             }
             .auth-options-row {
                 margin: 12px 2px 6px;
                 background: transparent;
             }
-            .auth-wrapper button[type="submit"] {
+            .auth-wrapper button[type="submit"],
+            .auth-wrapper #regSendOtpBtn,
+            .auth-wrapper #regVerifyOtpBtn {
                 width: 100%;
                 border-radius: 16px;
                 padding: 14px 20px;
@@ -631,20 +631,26 @@
     <div class="auth-wrapper <?= (isset($is_register) && $is_register) ? 'active' : '' ?>" id="authWrapper">
         <!-- Sign Up Form (Mitra Kerja) -->
         <div class="form-container sign-up">
-            <form action="/mitra/processRegister" method="post">
+            <form action="/mitra/processRegister" method="post" id="registerOtpForm">
 <?= csrf_field() ?>
                 <a href="<?= esc(rtrim(config('App')->webProfileURL, '/') . '/') ?>" title="Kembali ke Beranda INKINDO DKI Jakarta" style="display: inline-block; line-height: 0; margin: 0 auto;">
                     <img src="/logo-inkindo-auth.png" onerror="this.onerror=null;this.src='/logo-inkindo.png';" alt="INKINDO DKI Jakarta" class="auth-brand-logo">
                 </a>
-                <h1 style="color: var(--inkindo-blue); font-size: 28px;">Daftar Mitra Kerja</h1>
-                <p>Bergabung sebagai Mitra Kerja strategis INKINDO DKI Jakarta</p>
-                
+                <h1 style="color: var(--inkindo-blue); font-size: 26px;">Daftar Mitra Kerja</h1>
+                <p style="margin: 6px 0 10px;">Daftar akun menggunakan email aktif perusahaan Anda.</p>
+
+                <div class="otp-steps" id="regOtpStepPills">
+                    <span class="otp-step is-active" data-step="1">1. Email</span>
+                    <span class="otp-step" data-step="2">2. OTP</span>
+                    <span class="otp-step" data-step="3">3. Password</span>
+                </div>
+
                 <?php if(isset($registerError)): ?>
                     <div class="alert alert-danger"><?= esc($registerError) ?></div>
                 <?php endif; ?>
                 <?php if(isset($validation)): ?>
                     <div class="alert alert-danger">
-                        <ul class="list-unstyled">
+                        <ul class="list-unstyled mb-0">
                         <?php foreach($validation->getErrors() as $error): ?>
                             <li><?= esc($error) ?></li>
                         <?php endforeach ?>
@@ -652,25 +658,62 @@
                     </div>
                 <?php endif; ?>
 
-                <input type="text" name="website_hp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
-                <input type="hidden" name="captcha" value="">
-                <input type="email" name="email" placeholder="Masukkan Email Mitra" required value="<?= set_value('email') ?>" autocomplete="email">
-                <div class="auth-input-group">
-                    <i class="bi bi-lock auth-input-icon"></i>
-                    <input type="password" name="password" id="mitraRegPasswordInput" placeholder="Buat Password (min. 6 karakter)" minlength="6" required autocomplete="new-password">
-                    <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('mitraRegPasswordInput', this)" aria-label="Tampilkan password">
-                        <i class="bi bi-eye-slash"></i>
+                <div id="regOtpAlert" class="otp-alert" style="display: none;"></div>
+
+                <input type="text" name="website_hp" id="regWebsiteHp" value="" tabindex="-1" autocomplete="new-password" readonly class="auth-hp-field" aria-hidden="true">
+
+                <!-- Step 1: Cek Email & Kirim OTP -->
+                <div id="regOtpStep1" class="otp-step-panel">
+                    <div class="auth-input-group">
+                        <i class="bi bi-envelope auth-input-icon"></i>
+                        <input type="email" id="regEmailInput" placeholder="Masukkan Email Mitra" value="<?= set_value('email') ?>" autocomplete="email">
+                    </div>
+                    <button type="button" id="regSendOtpBtn" onclick="regSendOtp(false)">Daftar</button>
+                </div>
+
+                <!-- Step 2: Masukkan Kode OTP 6 Digit -->
+                <div id="regOtpStep2" class="otp-step-panel" style="display: none;">
+                    <div class="otp-masked-box">
+                        <i class="bi bi-envelope-check-fill"></i>
+                        <span>Kode OTP dikirim ke <strong id="regMaskedEmailText">***</strong></span>
+                    </div>
+                    <input type="text" id="regOtpCodeInput" class="otp-code-input" placeholder="••••••" maxlength="6" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code">
+                    <div class="otp-resend-row">
+                        <button type="button" class="otp-link-btn" onclick="goRegStep(1)">Ganti Email</button>
+                        <button type="button" class="otp-link-btn" id="regResendOtpBtn" onclick="regSendOtp(true)">Kirim Ulang OTP</button>
+                    </div>
+                    <button type="button" id="regVerifyOtpBtn" onclick="regVerifyOtp()">
+                        Verifikasi OTP <i class="bi bi-check-circle ms-1"></i>
                     </button>
                 </div>
-                <div class="auth-input-group">
-                    <i class="bi bi-shield-lock auth-input-icon"></i>
-                    <input type="password" name="confpassword" id="mitraRegConfPasswordInput" placeholder="Konfirmasi Password" required autocomplete="new-password">
-                    <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('mitraRegConfPasswordInput', this)" aria-label="Tampilkan konfirmasi password">
-                        <i class="bi bi-eye-slash"></i>
+
+                <!-- Step 3: Buat Password Baru & Lanjut Isi Profil Mitra -->
+                <div id="regOtpStep3" class="otp-step-panel" style="display: none;">
+                    <input type="hidden" name="email" id="regVerifiedEmailHidden" value="">
+                    <div class="otp-badge-verified">
+                        <i class="bi bi-patch-check-fill"></i>
+                        <span>Email terverifikasi: <strong id="regVerifiedEmailText"></strong></span>
+                    </div>
+                    <div class="auth-input-group">
+                        <i class="bi bi-lock auth-input-icon"></i>
+                        <input type="password" name="password" id="regOtpPasswordInput" placeholder="Buat Password (min. 8 karakter)" minlength="8" required autocomplete="new-password">
+                        <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('regOtpPasswordInput', this)" aria-label="Tampilkan password">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
+                    <div class="auth-input-group">
+                        <i class="bi bi-shield-lock auth-input-icon"></i>
+                        <input type="password" name="confpassword" id="regOtpConfPasswordInput" placeholder="Konfirmasi Password" minlength="8" required autocomplete="new-password">
+                        <button type="button" class="auth-eye-btn" onclick="togglePasswordVisibility('regOtpConfPasswordInput', this)" aria-label="Tampilkan konfirmasi password">
+                            <i class="bi bi-eye-slash"></i>
+                        </button>
+                    </div>
+                    <div id="regOtpPassMatchMsg" class="otp-match-msg"></div>
+                    <button type="submit">
+                        Daftar &amp; Isi Profil Mitra <i class="bi bi-arrow-right ms-1"></i>
                     </button>
                 </div>
-                <div id="mitraRegPasswordMatchMsg" style="width: 100%; text-align: left; font-size: 12px; font-weight: 600; min-height: 18px; margin: 2px 0 4px;"></div>
-                <button type="submit">Daftar Mitra</button>
+
                 <div class="mobile-auth-switch">
                     <span>Sudah terdaftar mitra?</span>
                     <button type="button" class="mobile-switch-btn" id="mobileLoginBtn">Masuk Mitra</button>
@@ -764,15 +807,7 @@
         </div>
     </div>
 
-    <div class="auth-forgot-modal-backdrop" id="forgotModal">
-        <div class="auth-forgot-modal-card">
-            <h3 style="color: var(--inkindo-blue); margin-bottom: 8px; font-size: 19px;">Lupa Password?</h3>
-            <p style="font-size: 13.5px; color: #475569; line-height: 1.6; margin-bottom: 18px;">
-                Untuk keamanan akun Mitra Kerja, silakan hubungi Admin Sekretariat DPP INKINDO DKI Jakarta di <strong>+62217942940</strong> atau email <strong>sekretariat@inkindo-dki.org</strong> untuk reset password.
-            </p>
-            <button type="button" onclick="closeForgotModal()" style="background: var(--inkindo-blue); color: #fff; border: none; border-radius: 12px; padding: 10px 24px; font-weight: 600; cursor: pointer;">Mengerti</button>
-        </div>
-    </div>
+    <?= view('auth/partials/forgot_password_modal', ['portal' => 'mitra']) ?>
 
     <script>
         let pendingAuthForm = null;
@@ -931,6 +966,7 @@
         if (loginBtn) loginBtn.addEventListener('click', showLogin);
         if (mobileLoginBtn) mobileLoginBtn.addEventListener('click', showLogin);
     </script>
+    <?= view('auth/partials/otp_auth_scripts', ['portal' => 'mitra']) ?>
 </body>
 </html>
 

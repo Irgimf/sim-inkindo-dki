@@ -148,7 +148,8 @@
                         <div class="mb-4 row">
                             <label class="col-sm-3 col-form-label fw-semibold">Email &amp; Website</label>
                             <div class="col-sm-5 mb-2 mb-sm-0">
-                                <input type="email" class="form-control" name="email" value="<?= esc((string) ($userEmail ?? '')) ?>" placeholder="email@perusahaan.co.id">
+                                <input type="email" class="form-control" name="email" placeholder="Email resmi perusahaan (untuk tampilan web)">
+                                <div class="form-text">Ditampilkan di direktori web publik &amp; bisa diubah kapan saja (terpisah dari email login).</div>
                             </div>
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" name="website" placeholder="www.perusahaan.co.id">
